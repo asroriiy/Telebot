@@ -1,0 +1,24 @@
+{
+  "name": "telebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asroriiy/telebot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/asroriiy/telebot/issues"
+  },
+  "homepage": "https://github.com/asroriiy/telebot#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "grammy": "^1.39.2"
+  }
+}
