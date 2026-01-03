@@ -23,6 +23,7 @@ const bot = new Bot("7196410668:AAE7H7dNMZ_dTDYapSb0JJlIXHqKEbVcENg");
 const USERS_FILE = "./users.json";
 const CHATS_FILE = "./chats.json";
 const WARNS_FILE = "./warns.json";
+const COOLDOWN_FILE = "./cooldowns.json";
 
 const initFile = (path, initialData) => {
     if (!fs.existsSync(path)) fs.writeFileSync(path, JSON.stringify(initialData));
@@ -30,15 +31,18 @@ const initFile = (path, initialData) => {
 initFile(USERS_FILE, []);
 initFile(CHATS_FILE, []);
 initFile(WARNS_FILE, {});
+initFile(COOLDOWN_FILE, {});
 
 let userDatabase = new Set(JSON.parse(fs.readFileSync(USERS_FILE)));
 let chatDatabase = new Set(JSON.parse(fs.readFileSync(CHATS_FILE)));
 let warns = JSON.parse(fs.readFileSync(WARNS_FILE));
+let cooldowns = JSON.parse(fs.readFileSync(COOLDOWN_FILE));
 
 const saveData = () => {
     fs.writeFileSync(USERS_FILE, JSON.stringify(Array.from(userDatabase)));
     fs.writeFileSync(CHATS_FILE, JSON.stringify(Array.from(chatDatabase)));
     fs.writeFileSync(WARNS_FILE, JSON.stringify(warns));
+    fs.writeFileSync(COOLDOWN_FILE, JSON.stringify(cooldowns));
 };
 
 const userKeyboard = new Keyboard().text("Yordam").text("Haqida").resized();
@@ -112,13 +116,7 @@ bot.on("message", async (ctx) => {
                 await ctx.deleteMessage().catch(() => {});
                 warns[userId] = (warns[userId] || 0) + 1;
                 saveData();
-
-                if (warns[userId] >= 3) {
-                    await ctx.banChatMember(userId).catch(() => {});
-                    delete warns[userId]; saveData();
-                    return ctx.reply(`🚫 ${ctx.from.first_name} qoidalarni buzgani uchun haydaldi.`);
-                }
-                return ctx.reply(`⚠️ ${ctx.from.first_name}, guruhda ${reason} taqiqlangan! (${warns[userId]}/3)`);
+                return ctx.reply(`⚠️ ${ctx.from.first_name}, guruhda ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
             }
         }
         return; 
@@ -152,6 +150,17 @@ bot.on("message", async (ctx) => {
     }
 
     if (!isAdmin && !isMenu && !text.startsWith("/")) {
+        const now = Date.now();
+        const lastTime = cooldowns[userId] || 0;
+        const oneDay = 24 * 60 * 60 * 1000;
+
+        if (now - lastTime < oneDay) {
+            const remaining = oneDay - (now - lastTime);
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            return ctx.reply(`⚠️ Siz kuniga faqat 1 marta murojaat yubora olasiz. \n\nQayta urinish: ${hours} soat ${minutes} daqiqa.`);
+        }
+
         const reportHeader = `📩 **Yangi murojaat!**\n👤 Ism: ${ctx.from.first_name}\n🆔 ID: ${userId}\n\n👇 Javob uchun reply qiling:`;
         for (const adminId of ADMINS) {
             try {
@@ -159,6 +168,9 @@ bot.on("message", async (ctx) => {
                 await bot.api.copyMessage(adminId, ctx.chat.id, ctx.message.message_id);
             } catch (e) { console.log(`Admin ${adminId} botni bloklagan.`); }
         }
+        
+        cooldowns[userId] = now;
+        saveData();
         return ctx.reply("Xabaringiz adminga yetkazildi! ✅");
     }
 });
