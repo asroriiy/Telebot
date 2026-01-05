@@ -135,7 +135,7 @@ bot.on("message", async (ctx) => {
     }
 
     if (text === "Yordam") {
-        const Keyboard = isAdmin ? adminKeyboard : userKeyboard;
+        const Keyboard = isAdmin ? adminKeyboard : userKeyboard || mahallalar;
         return ctx.reply("🆘 Mahallani tanlang." , {reply_markup: Keyboard}) 
     }
     if (text === "Haqida") return ctx.reply("🤖 Bu bot Angren shahar Yoshlar ishlari agentligi tomonidan tayyorlandi.");
@@ -226,4 +226,5 @@ console.log("Bot barqaror ishga tushdi...");
 
 process.once('SIGINT', () => bot.stop());
 process.once('SIGTERM', () => bot.stop());
+
 
