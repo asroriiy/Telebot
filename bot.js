@@ -47,7 +47,7 @@ const saveData = () => {
 
 const userKeyboard = new Keyboard().text("Yordam").text("Haqida").resized();
 const adminKeyboard = new Keyboard().text("Yordam").text("Haqida").row().text("📊 Statistika").text("📢 Yangilik").resized();
-
+const mahallalar = new Keyboard().text("8-mart").text("Buston").row().text("Dorilfunun").text("Lashkarak").row().text("Samarchuq").text("Ulug'bek").row().text("Xakkarman").text("Bobotog'").row().text("Beruniy").text("Bog'i surh").row().text("Chotqol").text("Do'stlik").row().text("Go'zal").text("G'afur G'ulom").row().text("Grum").text("Gulbog'").row().text("Gulzor").text("Istiqbol").row().text("Istiqlol").text("Jigariston").row().text("Karvon").text("Kimyogar").row().text("Ko'k terak").text("Maydon").row().text("Mustaqillik").text("Namuna").row().text("Navbahor").text("Navro'z-1").row().text("Nurchi").text("Obliq").row().text("Obod").text("Oppartak").row().text("Ozodlik").text("Qorabog'").row().text("Sog'lom").text("Taraqqiyot").row().text("YABS").text("Yangi go'shtsoy").row().text("Yangi hayot").text("Yangiobod").row().text("Yoshlik")
 bot.command("start", async (ctx) => {
     const userId = ctx.from.id;
     if (ctx.chat.type === "private") {
@@ -134,9 +134,49 @@ bot.on("message", async (ctx) => {
         }
     }
 
-    if (text === "Yordam") return ctx.reply("🆘 Adminga yozish uchun shunchaki xabar yuboring.");
+    if (text === "Yordam") return ctx.reply("🆘 Mahallani tanlang.");
     if (text === "Haqida") return ctx.reply("🤖 Bu bot Angren shahar Yoshlar ishlari agentligi tomonidan tayyorlandi.");
-
+    if (text === "8-mart") return ctx.reply("Mirmusayev Shaxzodbek Abdurashid o'g'li \n +998940341000")
+    if (text === "Buston") return ctx.reply("Abdurahatov Shoxrux Abdurashid o'g'li \n +998994631289 ")
+    if (text === "Dorilfunun") return ctx.reply("Ashurov Xasanbek Sayfiddin o'g'li \n +998944544411")
+    if (text ===  "Lashkarak") return ctx.reply("Mirzakarimov Bexzod  Faxriddinovich \n +998999720860")
+    if (text === "Samarchuq") return ctx.reply("Qo'chqorov Sardor Sherzod o'g'li \n +998945187727")
+    if (text === "Ulug'bek") return ctx.reply("Abduvahabova Barno Erkinjon qizi \n +998999081294")
+    if (text === "Xakkarman") return ctx.reply("Azimjonov Olimjon Azimjon o'g'li \n +998992615111 ")
+    if (text === "Bobotog'") return ctx.reply("Muxitdinov Shoxruxbek To'lqinovich \n +998331777723 ")
+    if (text === "Beruniy") return ctx.reply(" Tadjiyev Aloviddin Shavkatovich \n +998936285010 ")
+    if (text === "Bog'i surh") return ctx.reply("Arabova Mohira Karimovna \n +998931673777 ")
+    if (text === "Chotqol") return ctx.reply("Xayrullayev Durbek Ubaydulla o'g'li \n +998930050851 ")
+    if (text === "Do'stlik") return ctx.reply("Rustamova Ruxsora Sobirjon qizi \n +998943239503 ")
+    if (text === "Go'zal") return ctx.reply("Abduqaxxarov Dilmurod Umarali o'g'li \n +998991713676 ")
+    if (text === "G'afur G'ulom") return ctx.reply("Yuldashaliyev Ixtiyar Baxtiyarovich \n +998900938600 ")
+    if (text === "Grum") return ctx.reply("Qarshiboyev Sanjar Abdug'ani o'g'li  ")
+    if (text === "Gulbog'") return ctx.reply("Abdumannobov Doston Davrom o'g'li \n +998940146144 ")
+    if (text === "Gulzor") return ctx.reply("Axmedov Islombek Baxodir o'g'li \n +998943141144 ")
+    if (text === "Istiqbol") return ctx.reply("Sheraliyev Diyorbek Zafar o'g'li \n +998900084200 ")
+    if (text === "Istiqlol") return ctx.reply("Akromjonov Temurmalik Akromjon o'g'li \n +998944041016 ")
+    if (text === "Jigariston") return ctx.reply("Uralov Husniddin Urazali o'g'li \n +998944246292 ")
+    if (text === "Karvon") return ctx.reply("Boymatjonov Ahror Asqarjonovich \n +998945554045 ")
+    if (text === "Kimyogar") return ctx.reply("Mingboyev Ma'ruf Tolib o'g'li \n +998931690914 ")
+    if (text === "Ko'k terak") return ctx.reply("Axmedov Sulton Xasanboy O'gli \n +998990017144 ")
+    if (text === "Maydon") return ctx.reply("Matqosimov Javlon Orifjonovich \n +998940383735")
+    if (text === "Mustaqillik") return ctx.reply("Qurbonqulov Umidjon Shuhrat o'g'li \n +998931873673 ")
+    if (text === "Namuna") return ctx.reply("Abdumalikov Sardor Murodjon o'g'li \n +998932829657 ")
+    if (text === "Navbahor") return ctx.reply("Saydraxmanov Doston Saidibroximovich \n +998990996116")
+    if (text === "Navro'z-1") return ctx.reply("Uralov Muhammadali Abdullajon o'g'li \n +998958661501 ")
+    if (text === "Nurchi") return ctx.reply("Ashurboyev Asilbek Bahodiro'g'li \n +998936662124 ")
+    if (text === "Obliq") return ctx.reply("Nazmiddinxonov Zayniddinxon Baxodir o'g'li \n +998949323130 ")
+    if (text === "Obod") return ctx.reply("Madaminov Elyor Sherzod o'g'li \n +998909719717 ")
+    if (text === "Oppartak") return ctx.reply("Siddikov Samandar Xamroqulovich \n +998949444740 ")
+    if (text === "Ozodlik") return ctx.reply("Quvonov Ixtiyor Ilxamitdinovich \n +998943632334 ")
+    if (text === "Qorabog'") return ctx.reply("Umirzakov Axror Abdumannop o'g'li \n +998949265401 ")
+    if (text === "Sog'lom") return ctx.reply("Matxoliqov Javlon Jumaboy o'g'li +998931738419 ")
+    if (text === "Taraqqiyot") return ctx.reply(" Roxatillayev Sherzodbek Farxod o'g'li \n +998936273815 ")
+    if (text === "YABS") return ctx.reply("Axmedov Jahongir Mamasoli o'g'li \n +998949253675 ")
+    if (text === "Yangi go'shtsoy") return ctx.reply("Mamasodikov Doston Dilshod o'g'li \n +998997259299 ")
+    if (text === "Yangi hayot") return  ctx.reply("Jamolov Avazbek Azimjon o'g'li \n +998885449898 ")
+    if (text === "Yangiobod") return ctx.reply("Barkinov Farrux Xayrulla o'g'li \n +998991074167 ")
+    if (text === "Yoshlik") return ctx.reply("Chorshanbiyev Qudrat Alisherovich \n +998936004294")
     if (isAdmin && ctx.message.reply_to_message) {
         const replyMsg = ctx.message.reply_to_message.text || ctx.message.reply_to_message.caption || "";
         const targetId = replyMsg.match(/ID: (\d+)/)?.[1];
@@ -182,3 +222,4 @@ console.log("Bot barqaror ishga tushdi...");
 
 process.once('SIGINT', () => bot.stop());
 process.once('SIGTERM', () => bot.stop());
+
