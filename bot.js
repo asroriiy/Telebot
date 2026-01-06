@@ -33,9 +33,18 @@ initFile(USERS_FILE, []);
 initFile(CHATS_FILE, []);
 initFile(WARNS_FILE, {});
 
-let userDatabase = new Set(JSON.parse(fs.readFileSync(USERS_FILE)));
-let chatDatabase = new Set(JSON.parse(fs.readFileSync(CHATS_FILE)));
-let warns = JSON.parse(fs.readFileSync(WARNS_FILE));
+const readJson = (path, fallback) => {
+    try {
+        const data = fs.readFileSync(path, "utf8");
+        return JSON.parse(data || JSON.stringify(fallback));
+    } catch (e) {
+        return fallback;
+    }
+};
+
+let userDatabase = new Set((readJson(USERS_FILE, []) || []).map(Number));
+let chatDatabase = new Set((readJson(CHATS_FILE, []) || []).map(Number));
+let warns = readJson(WARNS_FILE, {});
 
 const saveData = () => {
     fs.writeFileSync(USERS_FILE, JSON.stringify(Array.from(userDatabase)));
@@ -195,7 +204,8 @@ bot.command("send", async (ctx) => {
 });
 
 bot.on("message", async (ctx) => {
-    const userId = ctx.from.id;
+    if (!ctx.from) return; 
+    const userId = ctx.from.id; 
     const text = ctx.message.text || ctx.message.caption || "";
     const document = ctx.message.document; 
     const isAdmin = ADMINS.includes(userId);
@@ -230,9 +240,10 @@ bot.on("message", async (ctx) => {
     if (isAdmin) {
         if (text === "📊 Statistika") return ctx.reply(`👤 Users: ${userDatabase.size}\n👥 Groups: ${chatDatabase.size}`);
         if (text === "⚠️ Ogohlantirishlar") {
+            if (!Object.keys(warns).length) return ctx.reply("Hali hech kimda warn yo'q.");
             let list = "📋 **Ro'yxat:**\n\n";
             Object.entries(warns).forEach(([id, c]) => list += `ID: \`${id}\` - ${c} marta\n`);
-            return ctx.reply(list || "Hali hech kimda warn yo'q.");
+            return ctx.reply(list);
         }
         if (text === "📢 Yangilik") return ctx.reply("Xabarga reply qilib `/send` yozing.");
     }
