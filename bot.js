@@ -161,7 +161,7 @@ const loyihalarHaqida = {
     }, 
     "Qizlar akademiyasi" : {
         img: "./qizlarakademiyasi.png",
-        info: "Qizlar akademiyasi - bu qizlarni ta'lim va kasb-hunarga yo'naltirishga qaratilgan loyiha bo'lib, unda STEM (fan, texnologiya, muhandislik, matematika) sohalarida malaka oshirish uchun maxsus kurslar va treninglar o'tkaziladi. \n Ilovani yuklab olish: \n http://play.google.com/store/apps/details?id=uz.globalmove.girls_academy&hl=uz \n https://apps.apple.com/us/app/qizlar-akademiyasi/id6557054918"
+        info: "“Qizlar akademiyasi” loyihasi bu — xotin-qizlarni qo‘llab-quvvatlashga va shaxsiy, kasbiy hamda intellektual rivojlanishiga qaratilgan loyiha bo‘lib, ularning bilim olish va ishga joylashish imkoniyatlarini yaratishni maqsad qiladi. Loyiha xotin-qizlarning ijtimoiy faolligini oshirib, ular uchun ijodiy hamda ma’rifiy imkoniyatlar eshigini ochadi. \n Ilovani yuklab olish: \n http://play.google.com/store/apps/details?id=uz.globalmove.girls_academy&hl=uz \n https://apps.apple.com/us/app/qizlar-akademiyasi/id6557054918"
     }, 
     "Matbuot va media" : {
         info: "Matbuot va media - bu yoshlarni ommaviy axborot vositalari sohasida malaka oshirishga qaratilgan loyiha bo'lib, unda jurnalistika, foto va video tahrirlash, ijtimoiy media boshqaruvi kabi ko'nikmalarni rivojlantirish uchun treninglar va amaliy mashg'ulotlar o'tkaziladi."
@@ -265,4 +265,5 @@ bot.on("message", async (ctx) => {
 });
 
 bot.start();
+
 
