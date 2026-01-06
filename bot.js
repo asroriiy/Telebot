@@ -1,6 +1,7 @@
 const express = require("express"); 
-const { Bot, Keyboard } = require("grammy");
+const { Bot, Keyboard, InputFile } = require("grammy");
 const fs = require("fs");
+const { info } = require("console");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,7 +14,6 @@ app.listen(PORT, () => {
     console.log(`Web server portda ishga tushdi: ${PORT}`);
 });
 
-// --- KONFIGURATSIYA ---
 const MAIN_ADMIN = 6235292618; 
 const PROMO_ADMIN = 624184607; 
 const ADMIN = 1202479635;
@@ -117,6 +117,48 @@ const contactData = {
     "Yoshlik": "Chorshanbiyev Qudrat Alisherovich \n +998936004294"
 };
 
+const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("⬅️ Orqaga").resized();
+
+const haqidaMenu = {
+    "Yoshlar daftari": "O'zbekiston qonunchiligiga ko'ra, 14 yoshga to'lgan va 30 yoshdan oshmagan (31 yoshga to'lmagan) fuqarolar **Yoshlar daftari** ga kiritilish huquqiga ega. Ushbu yosh toifasidagi fuqarolar jamg'arma mablag'lari hisobidan qo'llab-quvvatlanadi. Mazkur tashabbus yoshlarning ijtimoiy-iqtisodiy muammolarini hal etish va ularning turmush sifatini oshirishga qaratilgan. \n \n **Qo'llab quvvatlash turlari** \n • Yoshlarning bandligini ta'minlash \n  • Tadbirkorlikka jalb qilish \n • Xorijda xavfsiz mehnat migratsiyasini tashkil etish \n \n **Kasb-hunarga o'qitish: \n •Kasb-hunar o'rgatish orqali yoshlarni ish bilan ta'minlash. \n • Tadbirkorlik tashabbuslarini qo'llab-quvvatlash. \n \n **Ta'lim xarajatlarini qoplash:** \n • Ta'lim xarajatlarini qoplash uchun subsidiya ajratish. \n • Haydovchilik o'quv kurslari xarajatlarini qoplash. \n \n **Moddiy yordam:** \n •Og'ir moddiy ahvoldagi yoshlarga bir martalik yordam ko'rsatish. \n \n **Iqtidorli yoshlarni qo'llab-quvvatlash:** \n  • Ilm-fan, sport, san'at va madaniyat sohalaridagi tashabbuslarni rivojlantirish uchun subsidiyalar.",
+    "Volontyorlik": "Volontyorlik (faoliyati) - bu biror inson o'z xohishi bilan vaqti va mehnatini qandaydir jamoat ishiga, ko'p hollarda hech moddiy foydasiz yordam berishi. Ya'ni volontyorlik faoliyati bilan shug'ullanishda Siz ko'ngilli ravishda o'z vaqtingiz va kuchingizni qandaydir ijtimoiy ishlarni amalga oshirishga sarflaysiz. "
+};
+
+const loyihalar = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI").row().text("Mutolaa").row().text("Yashil makon").row().text("Iqtidor").row().text("Jasorat").row().text("Qizlar akademiyasi").row().text("Matbuot va media").resized();
+
+const loyihalarHaqida = {
+    "Ibrat Farzandlari" : {
+        img: "./ibrat.png",
+        info: "Ibrat Farzandlari - bu xorijiy tillarni onlayn tarzda o'rganish uchun mo'ljallangan platforma bo'lib, u foydalanuvchilarga interaktiv darslar, testlar va amaliy mashqlar orqali til ko'nikmalarini rivojlantirish imkoniyatini taqdim etadi."
+    } ,
+    "Ustoz AI" : {
+        img: "./ustozai.png",
+        info: "Ustoz AI - zamonaviy kasblarni o'rganishga qaratilgan ta'lim platformasi bo'lib, u o'quvchilarga individual yondashuv orqali bilim olish imkoniyatini taqdim etadi."
+    },
+    "Mutolaa" : {
+        img: "./mutolaa.png",
+        info: "Mutolaa - bu yoshlarni kitob o'qishga rag'batlantirish va ularning bilim doirasini kengaytirishga qaratilgan loyiha bo'lib, unda turli janrlardagi kitoblarning onlayn kutubxonasi hisoblanadi."
+    }, 
+    "Yashil makon" : {
+        img: "./yashilmakon.png",
+        info: "Yashil makon - bu atrof-muhitni muhofaza qilish va ekologik ongni oshirishga qaratilgan loyiha bo'lib, unda tabiatni asrash, daraxt ekish va chiqindilarni kamaytirish kabi tashabbuslar amalga oshiriladi."
+    }, 
+    "Iqtidor" : {
+        img: "./iqtidor.png",
+        info: "Iqtidor - bu yoshlarning iqtidorini kashf etish va rivojlantirishga qaratilgan loyiha bo'lib, unda turli sohalarda iste'dodli yoshlar uchun tanlovlar, treninglar va mentorlik dasturlari tashkil etiladi."
+    }, 
+    "Jasorat" : {
+        info: "Jasorat - bu yoshlar o'rtasida yetakchilik qobiliyatlarini rivojlantirishga qaratilgan loyiha bo'lib, unda liderlik treninglari, jamoaviy loyihalar va ijtimoiy tashabbuslar orqali yoshlarning o'ziga bo'lgan ishonchini oshirishga yordam beriladi."
+    }, 
+    "Qizlar akademiyasi" : {
+        img: "./qizlarakademiyasi.png",
+        info: "Qizlar akademiyasi - bu qizlarni ta'lim va kasb-hunarga yo'naltirishga qaratilgan loyiha bo'lib, unda STEM (fan, texnologiya, muhandislik, matematika) sohalarida malaka oshirish uchun maxsus kurslar va treninglar o'tkaziladi."
+    }, 
+    "Matbuot va media" : {
+        info: "Matbuot va media - bu yoshlarni ommaviy axborot vositalari sohasida malaka oshirishga qaratilgan loyiha bo'lib, unda jurnalistika, foto va video tahrirlash, ijtimoiy media boshqaruvi kabi ko'nikmalarni rivojlantirish uchun treninglar va amaliy mashg'ulotlar o'tkaziladi."
+    }
+};
+
 bot.command("start", async (ctx) => {
     const userId = ctx.from.id;
     if (ctx.chat.type === "private") {
@@ -195,9 +237,9 @@ bot.on("message", async (ctx) => {
         if (text === "📢 Yangilik") return ctx.reply("Xabarga reply qilib `/send` yozing.");
     }
 
-    if (text === "Yordam") return ctx.reply("🆘 Mahallani tanlang.", { reply_markup: mahallalar });
-    if (text === "Haqida") return ctx.reply("🤖 Yoshlar ishlari agentligi Angren shahar bo'limi boti.");
-
+    if (text === "Yordam") return ctx.reply(" Mahallani tanlang.", { reply_markup: mahallalar });
+    if (text === "Haqida") return ctx.reply("Quyidan kerakli bo'limni tanlang", { reply_markup: haqidaKeyboard });
+    if (text === "Loyihalar") return ctx.reply("Loyihani tanlang", { reply_markup: loyihalar})
     if (contactData[text]) return ctx.reply(contactData[text]);
 });
 
