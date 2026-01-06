@@ -138,15 +138,15 @@ const loyihalar = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI"
 const loyihalarHaqida = {
     "Ibrat Farzandlari" : {
         img: "./ibrat.png",
-        info: "Ibrat Farzandlari - bu xorijiy tillarni onlayn tarzda o'rganish uchun mo'ljallangan platforma bo'lib, u foydalanuvchilarga interaktiv darslar, testlar va amaliy mashqlar orqali til ko'nikmalarini rivojlantirish imkoniyatini taqdim etadi. \n Ilovani yuklab olish: https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari&hl=en \n https://apps.apple.com/tj/app/ibrat-academy/id6447472950"
+        info: "Ibrat Farzandlari - bu xorijiy tillarni onlayn tarzda o'rganish uchun mo'ljallangan platforma bo'lib, u foydalanuvchilarga interaktiv darslar, testlar va amaliy mashqlar orqali til ko'nikmalarini rivojlantirish imkoniyatini taqdim etadi. \n Ilovani yuklab olish: \n https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari&hl=en \n https://apps.apple.com/tj/app/ibrat-academy/id6447472950"
     } ,
     "Ustoz AI" : {
         img: "./ustozai.png",
-        info: "Ustoz AI - zamonaviy kasblarni o'rganishga qaratilgan ta'lim platformasi bo'lib, u o'quvchilarga individual yondashuv orqali bilim olish imkoniyatini taqdim etadi. \n Ilovani yuklab olish: https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai&hl=en \n https://apps.apple.com/us/app/ustoz-ai/id6504815934"
+        info: "Ustoz AI - zamonaviy kasblarni o'rganishga qaratilgan ta'lim platformasi bo'lib, u o'quvchilarga individual yondashuv orqali bilim olish imkoniyatini taqdim etadi. \n Ilovani yuklab olish: \n https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai&hl=en \n https://apps.apple.com/us/app/ustoz-ai/id6504815934"
     },
     "Mutolaa" : {
         img: "./mutolaa.png",
-        info: "Mutolaa - bu yoshlarni kitob o'qishga rag'batlantirish va ularning bilim doirasini kengaytirishga qaratilgan loyiha bo'lib, unda turli janrlardagi kitoblarning onlayn kutubxonasi hisoblanadi. \n Ilovani yuklab olish: https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa&hl=en \n https://apps.apple.com/us/app/mutolaa/id6475738561"
+        info: "Mutolaa - bu yoshlarni kitob o'qishga rag'batlantirish va ularning bilim doirasini kengaytirishga qaratilgan loyiha bo'lib, unda turli janrlardagi kitoblarning onlayn kutubxonasi hisoblanadi. \n Ilovani yuklab olish: \n https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa&hl=en \n https://apps.apple.com/us/app/mutolaa/id6475738561"
     }, 
     "Yashil makon" : {
         img: "./yashilmakon.png",
@@ -161,7 +161,7 @@ const loyihalarHaqida = {
     }, 
     "Qizlar akademiyasi" : {
         img: "./qizlarakademiyasi.png",
-        info: "Qizlar akademiyasi - bu qizlarni ta'lim va kasb-hunarga yo'naltirishga qaratilgan loyiha bo'lib, unda STEM (fan, texnologiya, muhandislik, matematika) sohalarida malaka oshirish uchun maxsus kurslar va treninglar o'tkaziladi."
+        info: "Qizlar akademiyasi - bu qizlarni ta'lim va kasb-hunarga yo'naltirishga qaratilgan loyiha bo'lib, unda STEM (fan, texnologiya, muhandislik, matematika) sohalarida malaka oshirish uchun maxsus kurslar va treninglar o'tkaziladi. \n Ilovani yuklab olish: \n http://play.google.com/store/apps/details?id=uz.globalmove.girls_academy&hl=uz \n https://apps.apple.com/us/app/qizlar-akademiyasi/id6557054918"
     }, 
     "Matbuot va media" : {
         info: "Matbuot va media - bu yoshlarni ommaviy axborot vositalari sohasida malaka oshirishga qaratilgan loyiha bo'lib, unda jurnalistika, foto va video tahrirlash, ijtimoiy media boshqaruvi kabi ko'nikmalarni rivojlantirish uchun treninglar va amaliy mashg'ulotlar o'tkaziladi."
@@ -265,3 +265,4 @@ bot.on("message", async (ctx) => {
 });
 
 bot.start();
+
