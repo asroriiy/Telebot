@@ -133,7 +133,7 @@ const haqidaMenu = {
     "Volontyorlik": "Volontyorlik (faoliyati) - bu biror inson o'z xohishi bilan vaqti va mehnatini qandaydir jamoat ishiga, ko'p hollarda hech moddiy foydasiz yordam berishi. Ya'ni volontyorlik faoliyati bilan shug'ullanishda Siz ko'ngilli ravishda o'z vaqtingiz va kuchingizni qandaydir ijtimoiy ishlarni amalga oshirishga sarflaysiz. "
 };
 
-const loyihalar = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI").row().text("Mutolaa").row().text("Yashil makon").row().text("Iqtidor").row().text("Jasorat").row().text("Qizlar akademiyasi").row().text("Matbuot va media").resized();
+const loyihalar = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI").row().text("Mutolaa").row().text("Yashil makon").row().text("Iqtidor").row().text("Jasorat").row().text("Qizlar akademiyasi").row().text("Matbuot va media").text("⬅️ Orqaga").resized();
 
 const loyihalarHaqida = {
     "Ibrat Farzandlari" : {
@@ -251,7 +251,17 @@ bot.on("message", async (ctx) => {
     if (text === "Yordam") return ctx.reply(" Mahallani tanlang.", { reply_markup: mahallalar });
     if (text === "Haqida") return ctx.reply("Quyidan kerakli bo'limni tanlang", { reply_markup: haqidaKeyboard });
     if (text === "Loyihalar") return ctx.reply("Loyihani tanlang", { reply_markup: loyihalar})
-    if (contactData[text]) return ctx.reply(contactData[text]);
+    if (contactData[text]) return ctx.reply(contactData[text]); 
+    if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text], { parse_mode: "Markdown" });
+    if (loyihalarHaqida[text]) {
+        const loyiha = loyihalarHaqida[text];
+        if (loyiha.img) {
+            await ctx.replyWithPhoto(new InputFile(loyiha.img), { caption: loyiha.info });
+        } else {
+            await ctx.reply(loyiha.info);
+        }
+        return;
+    };
 });
 
 bot.start();
