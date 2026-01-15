@@ -6,18 +6,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-    res.send('Bot is running...');
+    res.send('Bot status: Active');
 });
 
 app.listen(PORT, () => {
-    console.log("Server started on port: " + PORT);
+    console.log("Server ishga tushdi: " + PORT);
 });
 
 const MAIN_ADMIN = 6235292618;
 const PROMO_ADMIN = 624184607;
 const ADMIN = 1202479635;
 const ADMINS = [MAIN_ADMIN, PROMO_ADMIN, ADMIN];
-const LOG_GROUP_ID = 5132818564;
+const LOG_GROUP_ID = 5132818564; 
 
 const bot = new Bot("7196410668:AAE7H7dNMZ_dTDYapSb0JJlIXHqKEbVcENg");
 
@@ -39,9 +39,7 @@ const readJson = (path, fallback) => {
     try {
         const data = fs.readFileSync(path, "utf8");
         return JSON.parse(data || JSON.stringify(fallback));
-    } catch (e) {
-        return fallback;
-    }
+    } catch (e) { return fallback; }
 };
 
 let userDatabase = new Set((readJson(USERS_FILE, []) || []).map(Number));
@@ -57,10 +55,7 @@ const saveData = () => {
 };
 
 const userKeyboard = new Keyboard().text("Yordam").text("Haqida").row().text("✍️ Adminga murojaat").resized();
-const adminKeyboard = new Keyboard()
-    .text("Yordam").text("Haqida").row()
-    .text("📊 Statistika").text("⚠️ Ogohlantirishlar").row()
-    .text("📢 Yangilik").resized();
+const adminKeyboard = new Keyboard().text("Yordam").text("Haqida").row().text("📊 Statistika").text("⚠️ Ogohlantirishlar").row().text("📢 Yangilik").resized();
 
 const mahallalar = new Keyboard()
     .text("8-mart").text("Buston").row()
@@ -83,8 +78,11 @@ const mahallalar = new Keyboard()
     .text("Sog'lom").text("Taraqqiyot").row()
     .text("YABS").text("Yangi go'shtsoy").row()
     .text("Yangi hayot").text("Yangiobod").row()
-    .text("Yoshlik").row()
-    .text("⬅️ Orqaga").resized();
+    .text("Yoshlik").row().text("⬅️ Orqaga").resized();
+
+const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("⬅️ Orqaga").resized();
+
+const loyihalarKB = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI").row().text("Mutolaa").row().text("Yashil makon").row().text("Iqtidor").row().text("Jasorat").row().text("Qizlar akademiyasi").row().text("Matbuot va media").row().text("⬅️ Orqaga").resized();
 
 const contactData = {
     "8-mart": "Mirmusayev Shaxzodbek Abdurashid o'g'li \n +998940341000",
@@ -130,140 +128,121 @@ const contactData = {
     "Yoshlik": "Chorshanbiyev Qudrat Alisherovich \n +998936004294"
 };
 
-const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("⬅️ Orqaga").resized();
-
 const haqidaMenu = {
-    "Yoshlar daftari": "O'zbekiston qonunchiligiga ko'ra, 14 yoshga to'lgan va 30 yoshdan oshmagan fuqarolar <b>Yoshlar daftari</b> ga kiritilish huquqiga ega.",
-    "Volontyorlik": "Volontyorlik (faoliyati) - bu biror inson o'z xohishi bilan vaqti va mehnatini jamoat ishiga yordam berishi."
+    "Yoshlar daftari": "O'zbekiston qonunchiligiga ko'ra, 14 yoshdan 30 yoshgacha bo'lgan fuqarolar kiritiladi.",
+    "Volontyorlik": "Volontyorlik - jamiyat manfaati uchun ko'ngilli xizmat qilishdir."
 };
-
-const loyihalar = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI").row().text("Mutolaa").row().text("Yashil makon").row().text("Iqtidor").row().text("Jasorat").row().text("Qizlar akademiyasi").row().text("Matbuot va media").text("⬅️ Orqaga").resized();
 
 const loyihalarHaqida = {
-    "Ibrat Farzandlari" : { img: "./ibrat.png", info: "Ibrat Farzandlari - xorijiy tillarni onlayn o'rganish platformasi." },
-    "Ustoz AI" : { img: "./ustozai.png", info: "Ustoz AI - zamonaviy kasblarni o'rganish platformasi." },
-    "Mutolaa" : { img: "./mutolaa.png", info: "Mutolaa - kitobxonlik loyihasi." }, 
-    "Yashil makon" : { img: "./yashilmakon.png", info: "Yashil makon - ekologik loyiha." }, 
-    "Iqtidor" : { img: "./iqtidor.png", info: "Iqtidor - iste'dodli yoshlar loyihasi." }, 
-    "Jasorat" : { info: "Jasorat - yetakchilik qobiliyatini rivojlantirish loyihasi." }, 
-    "Qizlar akademiyasi" : { img: "./qizlarakademiyasi.png", info: "Qizlar akademiyasi - xotin-qizlar loyihasi." }, 
-    "Matbuot va media" : { info: "Matbuot va media - jurnalistika loyihasi." }
+    "Ibrat Farzandlari": { img: "./ibrat.png", info: "Ibrat Farzandlari - xorijiy tillarni onlayn o'rganish platformasi.\nLink: https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari" },
+    "Ustoz AI": { img: "./ustozai.png", info: "Ustoz AI - zamonaviy kasblarni o'rganish platformasi.\nLink: https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai" },
+    "Mutolaa": { img: "./mutolaa.png", info: "Mutolaa - kitobxonlik loyihasi.\nLink: https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa" },
+    "Yashil makon": { img: "./yashilmakon.png", info: "Yashil makon - ekologik loyiha." },
+    "Iqtidor": { img: "./iqtidor.png", info: "Iqtidor - iste'dodli yoshlarni qo'llash loyihasi." },
+    "Jasorat": { info: "Jasorat - liderlik va vatanparvarlik loyihasi." },
+    "Qizlar akademiyasi": { img: "./qizlarakademiyasi.png", info: "Qizlar akademiyasi - STEM va kasb-hunar loyihasi." },
+    "Matbuot va media": { info: "Matbuot va media - jurnalistika va media treninglari." }
 };
+
 
 bot.command("start", async (ctx) => {
     const userId = ctx.from.id;
-    if (ctx.chat.type === "private") {
-        userDatabase.add(userId);
-        saveData();
-        const keyboard = ADMINS.includes(userId) ? adminKeyboard : userKeyboard;
-        await ctx.reply("Assalomu alaykum, " + ctx.from.first_name + "!", { reply_markup: keyboard });
-    } else {
-        chatDatabase.add(ctx.chat.id);
-        saveData();
-    }
+    userDatabase.add(userId);
+    saveData();
+    const kb = ADMINS.includes(userId) ? adminKeyboard : userKeyboard;
+    await ctx.reply("Assalomu alaykum, " + ctx.from.first_name + "!", { reply_markup: kb });
 });
 
 bot.command("send", async (ctx) => {
     if (!ADMINS.includes(ctx.from.id)) return;
     const rep = ctx.message.reply_to_message;
-    if (!rep) return ctx.reply("❌ Xabarga reply qiling!");
+    if (!rep) return ctx.reply("Xabarga reply qiling!");
     const targets = [...new Set([...userDatabase, ...chatDatabase])];
-    await ctx.reply("⏳ Yuborish boshlandi...");
     let ok = 0;
     for (const tid of targets) {
-        try {
-            await bot.api.copyMessage(tid, ctx.chat.id, rep.message_id);
-            ok++;
-        } catch (e) {
-            userDatabase.delete(tid);
-            chatDatabase.delete(tid);
-        }
+        try { await bot.api.copyMessage(tid, ctx.chat.id, rep.message_id); ok++; } catch (e) {}
     }
-    saveData();
     await ctx.reply("✅ Yetkazildi: " + ok);
 });
 
 bot.on("message", async (ctx) => {
-    if (!ctx.from) return; 
-    const userId = ctx.from.id; 
-    const text = ctx.message.text || ctx.message.caption || "";
-    const document = ctx.message.document; 
+    if (!ctx.from) return;
+    const userId = ctx.from.id;
+    const text = ctx.message.text || "";
+    const document = ctx.message.document;
     const isAdmin = ADMINS.includes(userId);
+
+    if (isAdmin && ctx.message.reply_to_message) {
+        const replyText = ctx.message.reply_to_message.text || "";
+        const match = replyText.match(/ID:\s*(\d+)/);
+        if (match) {
+            const targetId = match[1];
+            try {
+                await bot.api.sendMessage(targetId, "<b>Murojaatingizga javob berildi:</b>\n\n" + text, { parse_mode: "HTML" });
+                return ctx.reply("✅ Javob foydalanuvchiga yuborildi.");
+            } catch (e) { return ctx.reply("❌ Yuborishda xato."); }
+        }
+    }
 
     if (ctx.chat.type !== "private") {
         let isSpam = false;
         let reason = "";
-        if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { isSpam = true; reason = "Reklama"; }
-        if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { isSpam = true; reason = "APK fayl"; }
+        if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { isSpam = true; reason = "reklama"; }
+        else if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { isSpam = true; reason = "APK"; }
+
         if (isSpam && !isAdmin) {
             const member = await ctx.getChatMember(userId);
             if (!["administrator", "creator"].includes(member.status)) {
                 warns[userId] = (warns[userId] || 0) + 1;
                 saveData();
                 await ctx.deleteMessage().catch(() => {});
-                await ctx.reply("⚠️ " + ctx.from.first_name + ", " + reason + " taqiqlangan! (Warn: " + warns[userId] + ")");
-                const logMsg = "🚨 <b>Qoidabuzar:</b>\n👤 " + ctx.from.first_name + "\n🆔 <code>" + userId + "</code>\n📂 " + reason + "\n📍 " + ctx.chat.title;
+                const logMsg = "🛡 <b>Xavfsizlik:</b>\n👤 " + ctx.from.first_name + "\n🆔 ID: <code>" + userId + "</code>\n⚠️ Holat: " + reason + "\n📈 Warns: " + warns[userId];
                 await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
-                return;
+                return ctx.reply("⚠️ " + ctx.from.first_name + ", reklama/APK mumkin emas!");
             }
-        }
-        return; 
-    }
-
-    if (text === "⬅️ Orqaga") {
-        const keyboard = isAdmin ? adminKeyboard : userKeyboard;
-        return ctx.reply("Asosiy menyuga qaytdingiz.", { reply_markup: keyboard });
-    }
-
-    if (isAdmin) {
-        if (text === "📊 Statistika") return ctx.reply("👤 Users: " + userDatabase.size + "\n👥 Groups: " + chatDatabase.size);
-        if (text === "⚠️ Ogohlantirishlar") {
-            if (!Object.keys(warns).length) return ctx.reply("Hali hech kimda warn yo'q.");
-            let list = "📋 <b>Ro'yxat:</b>\n\n";
-            Object.entries(warns).forEach(([id, c]) => list += "ID: <code>" + id + "</code> - " + c + " marta\n");
-            return ctx.reply(list, { parse_mode: "HTML" });
-        }
-        if (text === "📢 Yangilik") return ctx.reply("Xabarga reply qilib /send yozing.");
-    }
-
-    if (text === "Yordam") return ctx.reply("Mahallani tanlang.", { reply_markup: mahallalar });
-    if (text === "Haqida") return ctx.reply("Quyidan kerakli bo'limni tanlang", { reply_markup: haqidaKeyboard });
-    if (text === "Loyihalar") return ctx.reply("Loyihani tanlang", { reply_markup: loyihalar});
-    if (text === "✍️ Adminga murojaat") return ctx.reply("Xabaringizni yozing, u adminga uzatiladi.");
-    if (contactData[text]) return ctx.reply(contactData[text]); 
-    if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text], { parse_mode: "HTML" });
-    
-    if (loyihalarHaqida[text]) {
-        const loyiha = loyihalarHaqida[text];
-        if (loyiha.img && fs.existsSync(loyiha.img)) {
-            await ctx.replyWithPhoto(new InputFile(loyiha.img), { caption: loyiha.info });
-        } else {
-            await ctx.reply(loyiha.info);
         }
         return;
     }
 
-    const staticButtons = ["Yordam", "Haqida", "Loyihalar", "✍️ Adminga murojaat", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar", "📢 Yangilik"];
-    if (!isAdmin && !staticButtons.includes(text) && !contactData[text] && !haqidaMenu[text] && !loyihalarHaqida[text]) {
-        const now = Date.now();
-        const lastTime = lastMessages[userId] || 0;
-        const oneDay = 24 * 60 * 60 * 1000;
+    if (text === "⬅️ Orqaga") {
+        const kb = isAdmin ? adminKeyboard : userKeyboard;
+        return ctx.reply("Asosiy menyu.", { reply_markup: kb });
+    }
+    if (text === "Yordam") return ctx.reply("Mahallani tanlang:", { reply_markup: mahallalar });
+    if (text === "Haqida") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
+    if (text === "Loyihalar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
+    if (text === "✍️ Adminga murojaat") return ctx.reply("Murojaatingizni yozib qoldiring.");
 
-        if (now - lastTime < oneDay) {
-            const remaining = Math.ceil((oneDay - (now - lastTime)) / (60 * 60 * 1000));
-            return ctx.reply("Siz faqat kuniga bir marta murojaat yubora olasiz. Iltimos, " + remaining + " soatdan keyin urinib ko'ring.");
+    if (contactData[text]) return ctx.reply(contactData[text]);
+    if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text]);
+    if (loyihalarHaqida[text]) {
+        const p = loyihalarHaqida[text];
+        if (p.img && fs.existsSync(p.img)) {
+            return ctx.replyWithPhoto(new InputFile(p.img), { caption: p.info });
         }
+        return ctx.reply(p.info);
+    }
 
+    if (isAdmin) {
+        if (text === "📊 Statistika") return ctx.reply("👤 Userlar: " + userDatabase.size + "\n👥 Guruhlar: " + chatDatabase.size);
+        if (text === "⚠️ Ogohlantirishlar") return ctx.reply("Warns: " + JSON.stringify(warns));
+    }
+
+    const menuButtons = ["Yordam", "Haqida", "Loyihalar", "✍️ Adminga murojaat", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar"];
+    if (!isAdmin && !menuButtons.includes(text) && !contactData[text] && !haqidaMenu[text] && !loyihalarHaqida[text]) {
+        const now = Date.now();
+        if (now - (lastMessages[userId] || 0) < 86400000) return ctx.reply("Kuniga 1 marta murojaat mumkin.");
+        
         for (const adminId of ADMINS) {
             try {
-                const adminNotice = "📩 <b>Yangi murojaat!</b>\n\nKimdan: " + ctx.from.first_name + " (@" + (ctx.from.username || "yo'q") + ")\nID: <code>" + userId + "</code>\n\nXabar:";
-                await bot.api.sendMessage(adminId, adminNotice, { parse_mode: "HTML" });
+                const header = "📩 <b>Yangi murojaat!</b>\n\nKimdan: " + ctx.from.first_name + "\nID: " + userId + "\n\nXabar:";
+                await bot.api.sendMessage(adminId, header, { parse_mode: "HTML" });
                 await bot.api.copyMessage(adminId, ctx.chat.id, ctx.message.message_id);
             } catch (e) {}
         }
         lastMessages[userId] = now;
         saveData();
-        return ctx.reply("Xabaringiz adminga yetkazildi. Rahmat!");
+        return ctx.reply("Yuborildi.");
     }
 });
 
