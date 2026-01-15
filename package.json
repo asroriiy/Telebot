@@ -11,12 +11,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/asroriiy/telebot.git"
+    "url": "git+https://github.com/asroriiy/Telebot.git"
   },
   "bugs": {
-    "url": "https://github.com/asroriiy/telebot/issues"
+    "url": "https://github.com/asroriiy/Telebot/issues"
   },
-  "homepage": "https://github.com/asroriiy/telebot#readme",
+  "homepage": "https://github.com/asroriiy/Telebot#readme",
   "dependencies": {
     "express": "^5.2.1",
     "grammy": "^1.39.2"
