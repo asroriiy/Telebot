@@ -1,7 +1,6 @@
-const express = require("express"); 
+const express = require("express");
 const { Bot, Keyboard, InputFile } = require("grammy");
 const fs = require("fs");
-const { info } = require("console");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,24 +13,27 @@ app.listen(PORT, () => {
     console.log(`Web server portda ishga tushdi: ${PORT}`);
 });
 
-const MAIN_ADMIN = 6235292618; 
-const PROMO_ADMIN = 624184607; 
+const MAIN_ADMIN = 6235292618;
+const PROMO_ADMIN = 624184607;
 const ADMIN = 1202479635;
 const ADMINS = [MAIN_ADMIN, PROMO_ADMIN, ADMIN];
-const LOG_GROUP_ID = 5132818564; 
+const LOG_GROUP_ID = 5132818564;
 
 const bot = new Bot("7196410668:AAE7H7dNMZ_dTDYapSb0JJlIXHqKEbVcENg");
 
 const USERS_FILE = "./users.json";
 const CHATS_FILE = "./chats.json";
 const WARNS_FILE = "./warns.json";
+const LAST_MSG_FILE = "./last_messages.json";
 
 const initFile = (path, initialData) => {
     if (!fs.existsSync(path)) fs.writeFileSync(path, JSON.stringify(initialData));
 };
+
 initFile(USERS_FILE, []);
 initFile(CHATS_FILE, []);
 initFile(WARNS_FILE, {});
+initFile(LAST_MSG_FILE, {});
 
 const readJson = (path, fallback) => {
     try {
@@ -45,14 +47,16 @@ const readJson = (path, fallback) => {
 let userDatabase = new Set((readJson(USERS_FILE, []) || []).map(Number));
 let chatDatabase = new Set((readJson(CHATS_FILE, []) || []).map(Number));
 let warns = readJson(WARNS_FILE, {});
+let lastMessages = readJson(LAST_MSG_FILE, {});
 
 const saveData = () => {
     fs.writeFileSync(USERS_FILE, JSON.stringify(Array.from(userDatabase)));
     fs.writeFileSync(CHATS_FILE, JSON.stringify(Array.from(chatDatabase)));
     fs.writeFileSync(WARNS_FILE, JSON.stringify(warns));
+    fs.writeFileSync(LAST_MSG_FILE, JSON.stringify(lastMessages));
 };
 
-const userKeyboard = new Keyboard().text("Yordam").text("Haqida").resized();
+const userKeyboard = new Keyboard().text("Yordam").text("Haqida").row().text("✍️ Adminga murojaat").resized();
 const adminKeyboard = new Keyboard()
     .text("Yordam").text("Haqida").row()
     .text("📊 Statistika").text("⚠️ Ogohlantirishlar").row()
@@ -80,7 +84,7 @@ const mahallalar = new Keyboard()
     .text("YABS").text("Yangi go'shtsoy").row()
     .text("Yangi hayot").text("Yangiobod").row()
     .text("Yoshlik").row()
-    .text("⬅️ Orqaga").resized(); 
+    .text("⬅️ Orqaga").resized();
 
 const contactData = {
     "8-mart": "Mirmusayev Shaxzodbek Abdurashid o'g'li \n +998940341000",
@@ -250,9 +254,11 @@ bot.on("message", async (ctx) => {
 
     if (text === "Yordam") return ctx.reply(" Mahallani tanlang.", { reply_markup: mahallalar });
     if (text === "Haqida") return ctx.reply("Quyidan kerakli bo'limni tanlang", { reply_markup: haqidaKeyboard });
-    if (text === "Loyihalar") return ctx.reply("Loyihani tanlang", { reply_markup: loyihalar})
+    if (text === "Loyihalar") return ctx.reply("Loyihani tanlang", { reply_markup: loyihalar});
+    if (text === "✍️ Adminga murojaat") return ctx.reply("Xabaringizni yozing, men uni adminga yetkazaman.");
     if (contactData[text]) return ctx.reply(contactData[text]); 
     if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text], { parse_mode: "Markdown" });
+    
     if (loyihalarHaqida[text]) {
         const loyiha = loyihalarHaqida[text];
         if (loyiha.img) {
@@ -261,9 +267,29 @@ bot.on("message", async (ctx) => {
             await ctx.reply(loyiha.info);
         }
         return;
-    };
+    }
+
+    if (!isAdmin && ctx.chat.type === "private") {
+        const now = Date.now();
+        const lastTime = lastMessages[userId] || 0;
+        const oneDay = 24 * 60 * 60 * 1000;
+
+        if (now - lastTime < oneDay) {
+            const remaining = Math.ceil((oneDay - (now - lastTime)) / (60 * 60 * 1000));
+            return ctx.reply(`Siz faqat kuniga bir marta murojaat yubora olasiz. Iltimos, ${remaining} soatdan keyin urinib ko'ring.`);
+        }
+
+        for (const adminId of ADMINS) {
+            try {
+                await bot.api.sendMessage(adminId, `📩 **Yangi murojaat!**\n\nKimdan: ${ctx.from.first_name} (@${ctx.from.username || 'yo'q'})\nID: \`${userId}\`\n\nXabar:`);
+                await bot.api.copyMessage(adminId, ctx.chat.id, ctx.message.message_id);
+            } catch (e) {}
+        }
+
+        lastMessages[userId] = now;
+        saveData();
+        return ctx.reply("Xabaringiz adminga yetkazildi. Rahmat!");
+    }
 });
 
 bot.start();
-
-
