@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Web server portda ishga tushdi: ${PORT}`);
+    console.log(`Server started on port: ${PORT}`);
 });
 
 const MAIN_ADMIN = 6235292618;
@@ -133,43 +133,21 @@ const contactData = {
 const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("⬅️ Orqaga").resized();
 
 const haqidaMenu = {
-    "Yoshlar daftari": "O'zbekiston qonunchiligiga ko'ra, 14 yoshga to'lgan va 30 yoshdan oshmagan (31 yoshga to'lmagan) fuqarolar **Yoshlar daftari** ga kiritilish huquqiga ega. Ushbu yosh toifasidagi fuqarolar jamg'arma mablag'lari hisobidan qo'llab-quvvatlanadi. Mazkur tashabbus yoshlarning ijtimoiy-iqtisodiy muammolarini hal etish va ularning turmush sifatini oshirishga qaratilgan. \n \n **Qo'llab quvvatlash turlari** \n • Yoshlarning bandligini ta'minlash \n  • Tadbirkorlikka jalb qilish \n • Xorijda xavfsiz mehnat migratsiyasini tashkil etish \n \n **Kasb-hunarga o'qitish: \n •Kasb-hunar o'rgatish orqali yoshlarni ish bilan ta'minlash. \n • Tadbirkorlik tashabbuslarini qo'llab-quvvatlash. \n \n **Ta'lim xarajatlarini qoplash:** \n • Ta'lim xarajatlarini qoplash uchun subsidiya ajratish. \n • Haydovchilik o'quv kurslari xarajatlarini qoplash. \n \n **Moddiy yordam:** \n •Og'ir moddiy ahvoldagi yoshlarga bir martalik yordam ko'rsatish. \n \n **Iqtidorli yoshlarni qo'llab-quvvatlash:** \n  • Ilm-fan, sport, san'at va madaniyat sohalaridagi tashabbuslarni rivojlantirish uchun subsidiyalar.",
-    "Volontyorlik": "Volontyorlik (faoliyati) - bu biror inson o'z xohishi bilan vaqti va mehnatini qandaydir jamoat ishiga, ko'p hollarda hech moddiy foydasiz yordam berishi. Ya'ni volontyorlik faoliyati bilan shug'ullanishda Siz ko'ngilli ravishda o'z vaqtingiz va kuchingizni qandaydir ijtimoiy ishlarni amalga oshirishga sarflaysiz. "
+    "Yoshlar daftari": "O'zbekiston qonunchiligiga ko'ra, 14 yoshga to'lgan va 30 yoshdan oshmagan (31 yoshga to'lmagan) fuqarolar **Yoshlar daftari** ga kiritilish huquqiga ega.",
+    "Volontyorlik": "Volontyorlik (faoliyati) - bu biror inson o'z xohishi bilan vaqti va mehnatini jamoat ishiga sarflashidir."
 };
 
 const loyihalar = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI").row().text("Mutolaa").row().text("Yashil makon").row().text("Iqtidor").row().text("Jasorat").row().text("Qizlar akademiyasi").row().text("Matbuot va media").text("⬅️ Orqaga").resized();
 
 const loyihalarHaqida = {
-    "Ibrat Farzandlari" : {
-        img: "./ibrat.png",
-        info: "Ibrat Farzandlari - bu xorijiy tillarni onlayn tarzda o'rganish uchun mo'ljallangan platforma bo'lib, u foydalanuvchilarga interaktiv darslar, testlar va amaliy mashqlar orqali til ko'nikmalarini rivojlantirish imkoniyatini taqdim etadi. \n Ilovani yuklab olish: \n https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari&hl=en \n https://apps.apple.com/tj/app/ibrat-academy/id6447472950"
-    } ,
-    "Ustoz AI" : {
-        img: "./ustozai.png",
-        info: "Ustoz AI - zamonaviy kasblarni o'rganishga qaratilgan ta'lim platformasi bo'lib, u o'quvchilarga individual yondashuv orqali bilim olish imkoniyatini taqdim etadi. \n Ilovani yuklab olish: \n https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai&hl=en \n https://apps.apple.com/us/app/ustoz-ai/id6504815934"
-    },
-    "Mutolaa" : {
-        img: "./mutolaa.png",
-        info: "Mutolaa - bu yoshlarni kitob o'qishga rag'batlantirish va ularning bilim doirasini kengaytirishga qaratilgan loyiha bo'lib, unda turli janrlardagi kitoblarning onlayn kutubxonasi hisoblanadi. \n Ilovani yuklab olish: \n https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa&hl=en \n https://apps.apple.com/us/app/mutolaa/id6475738561"
-    }, 
-    "Yashil makon" : {
-        img: "./yashilmakon.png",
-        info: "Yashil makon - bu atrof-muhitni muhofaza qilish va ekologik ongni oshirishga qaratilgan loyiha bo'lib, unda tabiatni asrash, daraxt ekish va chiqindilarni kamaytirish kabi tashabbuslar amalga oshiriladi."
-    }, 
-    "Iqtidor" : {
-        img: "./iqtidor.png",
-        info: "Iqtidor - bu yoshlarning iqtidorini kashf etish va rivojlantirishga qaratilgan loyiha bo'lib, unda turli sohalarda iste'dodli yoshlar uchun tanlovlar, treninglar va mentorlik dasturlari tashkil etiladi."
-    }, 
-    "Jasorat" : {
-        info: "Jasorat - bu yoshlar o'rtasida yetakchilik qobiliyatlarini rivojlantirishga qaratilgan loyiha bo'lib, unda liderlik treninglari, jamoaviy loyihalar va ijtimoiy tashabbuslar orqali yoshlarning o'ziga bo'lgan ishonchini oshirishga yordam beriladi."
-    }, 
-    "Qizlar akademiyasi" : {
-        img: "./qizlarakademiyasi.png",
-        info: "“Qizlar akademiyasi” loyihasi bu — xotin-qizlarni qo‘llab-quvvatlashga va shaxsiy, kasbiy hamda intellektual rivojlanishiga qaratilgan loyiha bo‘lib, ularning bilim olish va ishga joylashish imkoniyatlarini yaratishni maqsad qiladi. Loyiha xotin-qizlarning ijtimoiy faolligini oshirib, ular uchun ijodiy hamda ma’rifiy imkoniyatlar eshigini ochadi. \n Ilovani yuklab olish: \n http://play.google.com/store/apps/details?id=uz.globalmove.girls_academy&hl=uz \n https://apps.apple.com/us/app/qizlar-akademiyasi/id6557054918"
-    }, 
-    "Matbuot va media" : {
-        info: "Matbuot va media - bu yoshlarni ommaviy axborot vositalari sohasida malaka oshirishga qaratilgan loyiha bo'lib, unda jurnalistika, foto va video tahrirlash, ijtimoiy media boshqaruvi kabi ko'nikmalarni rivojlantirish uchun treninglar va amaliy mashg'ulotlar o'tkaziladi."
-    }
+    "Ibrat Farzandlari" : { img: "./ibrat.png", info: "Ibrat Farzandlari - xorijiy tillarni onlayn o'rganish platformasi." },
+    "Ustoz AI" : { img: "./ustozai.png", info: "Ustoz AI - zamonaviy kasblarni o'rganish platformasi." },
+    "Mutolaa" : { img: "./mutolaa.png", info: "Mutolaa - kitobxonlik loyihasi." }, 
+    "Yashil makon" : { img: "./yashilmakon.png", info: "Yashil makon - ekologik loyiha." }, 
+    "Iqtidor" : { img: "./iqtidor.png", info: "Iqtidor - iste'dodli yoshlar uchun loyiha." }, 
+    "Jasorat" : { info: "Jasorat - yetakchilik qobiliyatini rivojlantirish loyihasi." }, 
+    "Qizlar akademiyasi" : { img: "./qizlarakademiyasi.png", info: "Qizlar akademiyasi - xotin-qizlarni qo'llab-quvvatlash loyihasi." }, 
+    "Matbuot va media" : { info: "Matbuot va media - jurnalistika sohasidagi loyiha." }
 };
 
 bot.command("start", async (ctx) => {
@@ -189,10 +167,8 @@ bot.command("send", async (ctx) => {
     if (!ADMINS.includes(ctx.from.id)) return;
     const rep = ctx.message.reply_to_message;
     if (!rep) return ctx.reply("❌ Xabarga reply qiling!");
-
     const targets = [...new Set([...userDatabase, ...chatDatabase])];
     await ctx.reply(`⏳ Yuborish boshlandi...`);
-
     let ok = 0;
     for (const tid of targets) {
         try {
@@ -219,7 +195,6 @@ bot.on("message", async (ctx) => {
         let reason = "";
         if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { isSpam = true; reason = "Reklama"; }
         if (document && document.file_name?.toLowerCase().endsWith(".apk")) { isSpam = true; reason = "APK fayl"; }
-
         if (isSpam && !isAdmin) {
             const member = await ctx.getChatMember(userId);
             if (!["administrator", "creator"].includes(member.status)) {
@@ -227,7 +202,6 @@ bot.on("message", async (ctx) => {
                 saveData();
                 await ctx.deleteMessage().catch(() => {});
                 await ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Warn: ${warns[userId]})`);
-                
                 const log = `🚨 **Qoidabuzar:**\n👤 ${ctx.from.first_name}\n🆔 \`${userId}\`\n📂 ${reason}\n📍 ${ctx.chat.title}`;
                 await bot.api.sendMessage(LOG_GROUP_ID, log).catch(() => {});
                 return;
@@ -261,7 +235,7 @@ bot.on("message", async (ctx) => {
     
     if (loyihalarHaqida[text]) {
         const loyiha = loyihalarHaqida[text];
-        if (loyiha.img) {
+        if (loyiha.img && fs.existsSync(loyiha.img)) {
             await ctx.replyWithPhoto(new InputFile(loyiha.img), { caption: loyiha.info });
         } else {
             await ctx.reply(loyiha.info);
@@ -269,7 +243,8 @@ bot.on("message", async (ctx) => {
         return;
     }
 
-    if (!isAdmin && ctx.chat.type === "private") {
+    const staticButtons = ["Yordam", "Haqida", "Loyihalar", "✍️ Adminga murojaat", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar", "📢 Yangilik"];
+    if (!isAdmin && !staticButtons.includes(text) && !contactData[text] && !haqidaMenu[text] && !loyihalarHaqida[text]) {
         const now = Date.now();
         const lastTime = lastMessages[userId] || 0;
         const oneDay = 24 * 60 * 60 * 1000;
@@ -285,7 +260,6 @@ bot.on("message", async (ctx) => {
                 await bot.api.copyMessage(adminId, ctx.chat.id, ctx.message.message_id);
             } catch (e) {}
         }
-
         lastMessages[userId] = now;
         saveData();
         return ctx.reply("Xabaringiz adminga yetkazildi. Rahmat!");
@@ -293,4 +267,3 @@ bot.on("message", async (ctx) => {
 });
 
 bot.start();
-
