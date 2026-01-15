@@ -255,7 +255,7 @@ bot.on("message", async (ctx) => {
     if (text === "Yordam") return ctx.reply(" Mahallani tanlang.", { reply_markup: mahallalar });
     if (text === "Haqida") return ctx.reply("Quyidan kerakli bo'limni tanlang", { reply_markup: haqidaKeyboard });
     if (text === "Loyihalar") return ctx.reply("Loyihani tanlang", { reply_markup: loyihalar});
-    if (text === "✍️ Adminga murojaat") return ctx.reply("Xabaringizni yozing, men uni adminga yetkazaman.");
+    if (text === "✍️ Adminga murojaat") return ctx.reply("Xabaringizni yozing, u adminga uzatiladi.");
     if (contactData[text]) return ctx.reply(contactData[text]); 
     if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text], { parse_mode: "Markdown" });
     
@@ -293,3 +293,4 @@ bot.on("message", async (ctx) => {
 });
 
 bot.start();
+
