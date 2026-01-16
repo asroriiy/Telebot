@@ -5,13 +5,8 @@ const fs = require("fs");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-    res.send('Bot status: Active');
-});
-
-app.listen(PORT, () => {
-    console.log("Server ishga tushdi: " + PORT);
-});
+app.get('/', (req, res) => { res.send('Bot status: Active'); });
+app.listen(PORT, () => { console.log("Server ishga tushdi: " + PORT); });
 
 const MAIN_ADMIN = 6235292618;
 const PROMO_ADMIN = 624184607;
@@ -188,7 +183,7 @@ bot.on("message", async (ctx) => {
         let isSpam = false;
         let reason = "";
         if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { isSpam = true; reason = "reklama"; }
-        else if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { isSpam = true; reason = "APK"; }
+        else if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { isSpam = true; reason = "APK fayl"; }
 
         if (isSpam && !isAdmin) {
             const member = await ctx.getChatMember(userId);
@@ -196,9 +191,14 @@ bot.on("message", async (ctx) => {
                 warns[userId] = (warns[userId] || 0) + 1;
                 saveData();
                 await ctx.deleteMessage().catch(() => {});
-                const logMsg = "🛡 <b>Xavfsizlik:</b>\n👤 " + ctx.from.first_name + "\n🆔 ID: <code>" + userId + "</code>\n⚠️ Holat: " + reason + "\n📈 Warns: " + warns[userId];
+                
+                const logMsg = "🛡 <b>Xavfsizlik tizimi:</b>\n\n👤 Foydalanuvchi: " + ctx.from.first_name + 
+                               "\n🆔 ID: <code>" + userId + "</code>\n⚠️ Holat: " + reason + 
+                               "\n📈 Jami ogohlantirishlar: " + warns[userId] + 
+                               "\n📍 Guruh: " + ctx.chat.title;
+                
                 await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
-                return ctx.reply("⚠️ " + ctx.from.first_name + ", reklama/APK mumkin emas!");
+                return ctx.reply("⚠️ " + ctx.from.first_name + ", reklama/APK taqiqlangan! (Warn: " + warns[userId] + ")");
             }
         }
         return;
@@ -215,6 +215,7 @@ bot.on("message", async (ctx) => {
 
     if (contactData[text]) return ctx.reply(contactData[text]);
     if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text]);
+    
     if (loyihalarHaqida[text]) {
         const p = loyihalarHaqida[text];
         if (p.img && fs.existsSync(p.img)) {
@@ -225,24 +226,24 @@ bot.on("message", async (ctx) => {
 
     if (isAdmin) {
         if (text === "📊 Statistika") return ctx.reply("👤 Userlar: " + userDatabase.size + "\n👥 Guruhlar: " + chatDatabase.size);
-        if (text === "⚠️ Ogohlantirishlar") return ctx.reply("Warns: " + JSON.stringify(warns));
+        if (text === "⚠️ Ogohlantirishlar") return ctx.reply("⚠️ Warns ro'yxati: " + JSON.stringify(warns, null, 2));
     }
 
-    const menuButtons = ["Yordam", "Haqida", "Loyihalar", "✍️ Adminga murojaat", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar"];
-    if (!isAdmin && !menuButtons.includes(text) && !contactData[text] && !haqidaMenu[text] && !loyihalarHaqida[text]) {
+    const reservedButtons = ["Yordam", "Haqida", "Loyihalar", "✍️ Adminga murojaat", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar"];
+    if (!isAdmin && ctx.chat.type === "private" && !reservedButtons.includes(text) && !contactData[text] && !haqidaMenu[text] && !loyihalarHaqida[text]) {
         const now = Date.now();
-        if (now - (lastMessages[userId] || 0) < 86400000) return ctx.reply("Kuniga 1 marta murojaat mumkin.");
+        if (now - (lastMessages[userId] || 0) < 86400000) return ctx.reply("Kuniga faqat 1 marta murojaat yuborish mumkin.");
         
         for (const adminId of ADMINS) {
             try {
-                const header = "📩 <b>Yangi murojaat!</b>\n\nKimdan: " + ctx.from.first_name + "\nID: " + userId + "\n\nXabar:";
-                await bot.api.sendMessage(adminId, header, { parse_mode: "HTML" });
+                const info = "📩 <b>Yangi murojaat!</b>\n\nKimdan: " + ctx.from.first_name + "\nID: " + userId + "\n\nXabar:";
+                await bot.api.sendMessage(adminId, info, { parse_mode: "HTML" });
                 await bot.api.copyMessage(adminId, ctx.chat.id, ctx.message.message_id);
             } catch (e) {}
         }
         lastMessages[userId] = now;
         saveData();
-        return ctx.reply("Yuborildi.");
+        return ctx.reply("Murojaatingiz adminga yuborildi.");
     }
 });
 
