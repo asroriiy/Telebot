@@ -14,7 +14,7 @@ const ADMIN = 1202479635;
 const ADMINS = [MAIN_ADMIN, PROMO_ADMIN, ADMIN];
 const LOG_GROUP_ID = 5132818564; 
 
-const bot = new Bot("8466055513:AAELhSQeLJ_4dlq6wiQuXvGzEWRytgFJfGI");
+const bot = new Bot("7196410668:AAE7H7dNMZ_dTDYapSb0JJlIXHqKEbVcENg");
 
 const USERS_FILE = "./users.json";
 const CHATS_FILE = "./chats.json";
