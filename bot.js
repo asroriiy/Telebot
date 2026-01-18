@@ -14,7 +14,7 @@ const ADMIN = 1202479635;
 const ADMINS = [MAIN_ADMIN, PROMO_ADMIN, ADMIN];
 const LOG_GROUP_ID = 5132818564; 
 
-const bot = new Bot("7196410668:AAE7H7dNMZ_dTDYapSb0JJlIXHqKEbVcENg");
+const bot = new Bot("8466055513:AAELhSQeLJ_4dlq6wiQuXvGzEWRytgFJfGI");
 
 const USERS_FILE = "./users.json";
 const CHATS_FILE = "./chats.json";
@@ -75,7 +75,15 @@ const mahallalar = new Keyboard()
     .text("Yangi hayot").text("Yangiobod").row()
     .text("Yoshlik").row().text("⬅️ Orqaga").resized();
 
-const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("⬅️ Orqaga").resized();
+const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("Mahalla yettiligi").text("⬅️ Orqaga").resized();
+const mahallayYettiligiKB = new Keyboard()
+    .text("Rais").row()
+    .text("Hokim yordamchisi").row()
+    .text("Yoshlar yetakchisi").row()
+    .text("Xotin-qizlar faoli").row()
+    .text("Profilaktika inspektori").row()
+    .text("Ijtimoiy xodim").row()
+    .text("⬅️ Orqaga").resized();
 
 const loyihalarKB = new Keyboard().text("Ibrat Farzandlari").row().text("Ustoz AI").row().text("Mutolaa").row().text("Yashil makon").row().text("Iqtidor").row().text("Jasorat").row().text("Qizlar akademiyasi").row().text("Matbuot va media").row().text("⬅️ Orqaga").resized();
 
@@ -125,21 +133,28 @@ const contactData = {
 
 const haqidaMenu = {
     "Yoshlar daftari": "O'zbekiston qonunchiligiga ko'ra, 14 yoshdan 30 yoshgacha bo'lgan fuqarolar kiritiladi.",
-    "Volontyorlik": "Volontyorlik - jamiyat manfaati uchun ko'ngilli xizmat qilishdir."
+    "Volontyorlik": "Volontyorlik - jamiyat manfaati uchun ko'ngilli xizmat qilishdir.",
 };
 
 const loyihalarHaqida = {
     "Ibrat Farzandlari": { img: "./ibrat.png", info: "Ibrat Farzandlari - xorijiy tillarni onlayn o'rganish platformasi.\nLink: https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari" },
     "Ustoz AI": { img: "./ustozai.png", info: "Ustoz AI - zamonaviy kasblarni o'rganish platformasi.\nLink: https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai" },
-    "Mutolaa": { img: "./mutolaa.png", info: "Mutolaa - kitobxonlik loyihasi.\nLink: https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa" },
-    "Yashil makon": { img: "./yashilmakon.png", info: "Yashil makon - ekologik loyiha." },
-    "Iqtidor": { img: "./iqtidor.png", info: "Iqtidor - iste'dodli yoshlarni qo'llash loyihasi." },
+    "Mutolaa": { img: "./mutolaa.png", info: "Mutolaa - onlayn kutubxonani o'z ichiga olgan kitobxonlik loyihasi.\nLink: https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa" },
+    "Yashil makon": { img: "./yashilmakon.png", info: "Yashil makon - ekologiyani asrash uchun ishlab chiqilgan loyiha." },
+    "Iqtidor": { img: "./iqtidor.png", info: "Iqtidor - iste'dodli yoshlarni aniqlash va qo'llash loyihasi." },
     "Jasorat": { info: "Jasorat - liderlik va vatanparvarlik loyihasi." },
     "Qizlar akademiyasi": { img: "./qizlarakademiyasi.png", info: "Qizlar akademiyasi - STEM va kasb-hunar loyihasi." },
     "Matbuot va media": { info: "Matbuot va media - jurnalistika va media treninglari." }
 };
 
-
+const mahallar7 = {
+    "Rais": "Ehtiyojmand oilalarga uy-joyini yaxshilashga ko‘maklashish, mahallaning umumiy ahvolini nazorat qilish.",
+    "Hokim yordamchisi": "Ishsiz fuqarolarga ish topishda yordam ko‘rsatish, bandlik masalalarini hal qilish.",
+    "Yoshlar yetakchisi": "Yoshlarni sport, musiqa va turli to‘garaklarga jalb qilish orqali bo‘sh vaqtni mazmunli o‘tkazishni ta’minlash.",
+    "Xotin-qizlar faoli": "Ayollarni tadbirkorlik, kasanachilik va hunarmandchilikka jalb qilish orqali ularning iqtisodiy ahvolini yaxshilash.",
+    "Profilaktika inspektori": "Soliq bazasini kengaytirish, tadbirkorlik faoliyatini qonuniylashtirish va o‘zini o‘zi band qilganlarni kichik biznes toifasiga o‘tkazishga ko‘maklashish.",
+    "Ijtimoiy xodim": "Yolg‘iz keksalar, nogironlar va boshqa muhtojlarga ijtimoiy xizmat ko‘rsatish bilan shug‘ullanish."
+}
 bot.command("start", async (ctx) => {
     const userId = ctx.from.id;
     userDatabase.add(userId);
@@ -178,31 +193,48 @@ bot.on("message", async (ctx) => {
             } catch (e) { return ctx.reply("❌ Yuborishda xato."); }
         }
     }
+if (ctx.chat.type !== "private") {
+    let isSpam = false;
+    let reason = "";
+    
+    const message = ctx.message;
+    const text = message?.text || message?.caption;
+    const document = message?.document;
+    const userId = ctx.from.id;
 
-    if (ctx.chat.type !== "private") {
-        let isSpam = false;
-        let reason = "";
-        if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { isSpam = true; reason = "reklama"; }
-        else if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { isSpam = true; reason = "APK fayl"; }
-
-        if (isSpam && !isAdmin) {
-            const member = await ctx.getChatMember(userId);
-            if (!["administrator", "creator"].includes(member.status)) {
-                warns[userId] = (warns[userId] || 0) + 1;
-                saveData();
-                await ctx.deleteMessage().catch(() => {});
-                
-                const logMsg = "🛡 <b>Xavfsizlik tizimi:</b>\n\n👤 Foydalanuvchi: " + ctx.from.first_name + 
-                               "\n🆔 ID: <code>" + userId + "</code>\n⚠️ Holat: " + reason + 
-                               "\n📈 Jami ogohlantirishlar: " + warns[userId] + 
-                               "\n📍 Guruh: " + ctx.chat.title;
-                
-                await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
-                return ctx.reply("⚠️ " + ctx.from.first_name + ", reklama/APK taqiqlangan! (Warn: " + warns[userId] + ")");
-            }
-        }
-        return;
+    if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { 
+        isSpam = true; 
+        reason = "Reklama tarqatish"; 
+    } 
+    else if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { 
+        isSpam = true; 
+        reason = "APK fayl yuborish"; 
     }
+
+    if (isSpam) {
+        const member = await ctx.getChatMember(userId);
+        const isAdmin = ["administrator", "creator"].includes(member.status);
+
+        if (!isAdmin) {
+            warns[userId] = (warns[userId] || 0) + 1;
+            saveData();
+            
+            await ctx.deleteMessage().catch(() => {});
+
+            const logMsg = "🛡 <b>Xavfsizlik tizimi:</b>\n\n" +
+                           "👤 Foydalanuvchi: " + ctx.from.first_name + 
+                           "\n🆔 ID: <code>" + userId + "</code>\n" +
+                           "⚠️ Sabab: " + reason + 
+                           "\n📈 Jami ogohlantirishlar: " + warns[userId] + 
+                           "\n📍 Guruh: " + ctx.chat.title;
+            
+            await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
+
+            return ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
+        }
+    }
+    return;
+}
 
     if (text === "⬅️ Orqaga") {
         const kb = isAdmin ? adminKeyboard : userKeyboard;
@@ -211,6 +243,8 @@ bot.on("message", async (ctx) => {
     if (text === "Yordam") return ctx.reply("Mahallani tanlang:", { reply_markup: mahallalar });
     if (text === "Haqida") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
     if (text === "Loyihalar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
+    if (text === "Mahalla yettiligi") return ctx.reply("Yettilik a'zosini tanlang:", { reply_markup: mahallayYettiligiKB });
+    if (mahallalar7[text]) return ctx.reply(mahallar7[text]);
     if (text === "✍️ Adminga murojaat") return ctx.reply("Murojaatingizni yozib qoldiring.");
 
     if (contactData[text]) return ctx.reply(contactData[text]);
