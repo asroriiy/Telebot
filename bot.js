@@ -233,7 +233,6 @@ if (ctx.chat.type !== "private") {
             return ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
         }
     }
-    return;
 }
 
     if (text === "⬅️ Orqaga") {
@@ -282,3 +281,4 @@ if (ctx.chat.type !== "private") {
 });
 
 bot.start();
+
