@@ -4,6 +4,7 @@
   "description": "",
   "main": "bot.js",
   "scripts": {
+    "start": "node bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -18,6 +19,7 @@
   },
   "homepage": "https://github.com/asroriiy/Telebot#readme",
   "dependencies": {
+    "dotenv": "^16.4.0",
     "express": "^5.2.1",
     "grammy": "^1.39.2"
   }
