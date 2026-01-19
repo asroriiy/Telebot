@@ -1,20 +1,23 @@
+require('dotenv').config(); // Dotenv paketini chaqiramiz
 const express = require("express");
 const { Bot, Keyboard, InputFile } = require("grammy");
 const fs = require("fs");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Environment'dan o'qiymiz, agar bo'lmasa 3000 ni oladi
+const PORT = process.env.PORT || 3000; 
 
-app.get('/', (req, res) => { res.send('Bot status: Active'); });
-app.listen(PORT, () => { console.log("Server ishga tushdi: " + PORT); });
-
-const MAIN_ADMIN = 6235292618;
-const PROMO_ADMIN = 624184607;
-const ADMIN = 1202479635;
+// Adminlarni raqam (Number) ko'rinishida olish
+const MAIN_ADMIN = Number(process.env.MAIN_ADMIN);
+const PROMO_ADMIN = Number(process.env.PROMO_ADMIN);
+const ADMIN = Number(process.env.ADMIN);
 const ADMINS = [MAIN_ADMIN, PROMO_ADMIN, ADMIN];
-const LOG_GROUP_ID = 5132818564; 
+const LOG_GROUP_ID = Number(process.env.LOG_GROUP_ID); 
 
-const bot = new Bot("7196410668:AAE7H7dNMZ_dTDYapSb0JJlIXHqKEbVcENg");
+// Bot tokenini Environment'dan olish
+const bot = new Bot(process.env.BOT_TOKEN);
+
+// ... qolgan kodlar o'zgarishsiz qoladi
 
 // --- Xatoliklarni ushlash (Bot o'chib qolmasligi uchun) ---
 bot.catch((err) => {
@@ -280,3 +283,4 @@ bot.on("message", async (ctx) => {
 });
 
 bot.start();
+
