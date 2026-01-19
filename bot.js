@@ -282,5 +282,17 @@ bot.on("message", async (ctx) => {
     }
 });
 
-bot.start();
+// --- SERVER VA BOTNI ISHGA TUSHIRISH ---
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Server ${PORT}-portda ishga tushdi`);
+    
+    // Botni faqat server tayyor bo'lgach start qilamiz
+    bot.start({
+        onStart: (me) => {
+            console.log(`🤖 Bot @${me.username} sifatida ishga tushdi`);
+        },
+    }).catch((err) => {
+        console.error("❌ Botni ishga tushirishda xato:", err);
+    });
+});
 
