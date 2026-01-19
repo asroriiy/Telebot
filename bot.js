@@ -283,16 +283,24 @@ bot.on("message", async (ctx) => {
 });
 
 // --- SERVER VA BOTNI ISHGA TUSHIRISH ---
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, "0.0.0.0", async () => {
     console.log(`✅ Server ${PORT}-portda ishga tushdi`);
     
-    // Botni faqat server tayyor bo'lgach start qilamiz
-    bot.start({
-        onStart: (me) => {
-            console.log(`🤖 Bot @${me.username} sifatida ishga tushdi`);
-        },
-    }).catch((err) => {
-        console.error("❌ Botni ishga tushirishda xato:", err);
-    });
+    try {
+        // 1. Eski webhook yoki polling ulanishlarini tozalash (409 xatosini oldini oladi)
+        // drop_pending_updates: true - bot o'chiq turganda kelgan xabarlarni o'chirib yuboradi
+        await bot.api.deleteWebhook({ drop_pending_updates: true });
+        console.log("🔄 Eski ulanishlar tozalandi va navbatdagi xabarlar yuborildi.");
+
+        // 2. Botni start qilish
+        bot.start({
+            onStart: (me) => {
+                console.log(`🤖 Bot @${me.username} sifatida muvaffaqiyatli ishga tushdi`);
+            },
+            allowed_updates: ["message", "callback_query", "chat_member"], 
+        });
+    } catch (err) {
+        console.error("❌ Botni ishga tushirishda texnik xato:", err);
+    }
 });
 
