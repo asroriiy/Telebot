@@ -16,6 +16,11 @@ const LOG_GROUP_ID = 5132818564;
 
 const bot = new Bot("7196410668:AAE7H7dNMZ_dTDYapSb0JJlIXHqKEbVcENg");
 
+// --- Xatoliklarni ushlash (Bot o'chib qolmasligi uchun) ---
+bot.catch((err) => {
+    console.error(`Error in middleware:`, err.error);
+});
+
 const USERS_FILE = "./users.json";
 const CHATS_FILE = "./chats.json";
 const WARNS_FILE = "./warns.json";
@@ -147,14 +152,15 @@ const loyihalarHaqida = {
     "Matbuot va media": { info: "Matbuot va media - jurnalistika va media treninglari." }
 };
 
-const mahallar7 = {
+const mahallalar7 = {
     "Rais": "Ehtiyojmand oilalarga uy-joyini yaxshilashga ko‘maklashish, mahallaning umumiy ahvolini nazorat qilish.",
     "Hokim yordamchisi": "Ishsiz fuqarolarga ish topishda yordam ko‘rsatish, bandlik masalalarini hal qilish.",
     "Yoshlar yetakchisi": "Yoshlarni sport, musiqa va turli to‘garaklarga jalb qilish orqali bo‘sh vaqtni mazmunli o‘tkazishni ta’minlash.",
     "Xotin-qizlar faoli": "Ayollarni tadbirkorlik, kasanachilik va hunarmandchilikka jalb qilish orqali ularning iqtisodiy ahvolini yaxshilash.",
     "Profilaktika inspektori": "Soliq bazasini kengaytirish, tadbirkorlik faoliyatini qonuniylashtirish va o‘zini o‘zi band qilganlarni kichik biznes toifasiga o‘tkazishga ko‘maklashish.",
     "Ijtimoiy xodim": "Yolg‘iz keksalar, nogironlar va boshqa muhtojlarga ijtimoiy xizmat ko‘rsatish bilan shug‘ullanish."
-}
+};
+
 bot.command("start", async (ctx) => {
     const userId = ctx.from.id;
     userDatabase.add(userId);
@@ -175,13 +181,42 @@ bot.command("send", async (ctx) => {
     await ctx.reply("✅ Yetkazildi: " + ok);
 });
 
+// --- ASOSIY MESSAGE HANDLER ---
 bot.on("message", async (ctx) => {
     if (!ctx.from) return;
     const userId = ctx.from.id;
     const text = ctx.message.text || "";
-    const document = ctx.message.document;
     const isAdmin = ADMINS.includes(userId);
 
+    // 1. Guruhlardagi spamni tekshirish
+    if (ctx.chat.type !== "private") {
+        let isSpam = false;
+        let reason = "";
+        const document = ctx.message.document;
+
+        if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { 
+            isSpam = true; reason = "Reklama tarqatish"; 
+        } 
+        else if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { 
+            isSpam = true; reason = "APK fayl yuborish"; 
+        }
+
+        if (isSpam) {
+            const member = await ctx.getChatMember(userId);
+            const isGroupAdmin = ["administrator", "creator"].includes(member.status);
+            if (!isGroupAdmin) {
+                warns[userId] = (warns[userId] || 0) + 1;
+                saveData();
+                await ctx.deleteMessage().catch(() => {});
+                const logMsg = `🛡 <b>Xavfsizlik tizimi:</b>\n\n👤 Foydalanuvchi: ${ctx.from.first_name}\n🆔 ID: <code>${userId}</code>\n⚠️ Sabab: ${reason}\n📈 Jami ogohlantirishlar: ${warns[userId]}\n📍 Guruh: ${ctx.chat.title}`;
+                await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
+                return ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
+            }
+        }
+        return; // Guruhlarda boshqa buyruqlar ishlamasin
+    }
+
+    // 2. Admin javobi (Reply orqali)
     if (isAdmin && ctx.message.reply_to_message) {
         const replyText = ctx.message.reply_to_message.text || "";
         const match = replyText.match(/ID:\s*(\d+)/);
@@ -193,48 +228,8 @@ bot.on("message", async (ctx) => {
             } catch (e) { return ctx.reply("❌ Yuborishda xato."); }
         }
     }
-if (ctx.chat.type !== "private") {
-    let isSpam = false;
-    let reason = "";
-    
-    const message = ctx.message;
-    const text = message?.text || message?.caption;
-    const document = message?.document;
-    const userId = ctx.from.id;
 
-    if (text && /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/i.test(text)) { 
-        isSpam = true; 
-        reason = "Reklama tarqatish"; 
-    } 
-    else if (document && document.file_name && document.file_name.toLowerCase().endsWith(".apk")) { 
-        isSpam = true; 
-        reason = "APK fayl yuborish"; 
-    }
-
-    if (isSpam) {
-        const member = await ctx.getChatMember(userId);
-        const isAdmin = ["administrator", "creator"].includes(member.status);
-
-        if (!isAdmin) {
-            warns[userId] = (warns[userId] || 0) + 1;
-            saveData();
-            
-            await ctx.deleteMessage().catch(() => {});
-
-            const logMsg = "🛡 <b>Xavfsizlik tizimi:</b>\n\n" +
-                           "👤 Foydalanuvchi: " + ctx.from.first_name + 
-                           "\n🆔 ID: <code>" + userId + "</code>\n" +
-                           "⚠️ Sabab: " + reason + 
-                           "\n📈 Jami ogohlantirishlar: " + warns[userId] + 
-                           "\n📍 Guruh: " + ctx.chat.title;
-            
-            await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
-
-            return ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
-        }
-    }
-}
-
+    // 3. Menyu buyruqlari
     if (text === "⬅️ Orqaga") {
         const kb = isAdmin ? adminKeyboard : userKeyboard;
         return ctx.reply("Asosiy menyu.", { reply_markup: kb });
@@ -243,11 +238,11 @@ if (ctx.chat.type !== "private") {
     if (text === "Haqida") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
     if (text === "Loyihalar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
     if (text === "Mahalla yettiligi") return ctx.reply("Yettilik a'zosini tanlang:", { reply_markup: mahallayYettiligiKB });
-    if (mahallalar7[text]) return ctx.reply(mahallar7[text]);
     if (text === "✍️ Adminga murojaat") return ctx.reply("Murojaatingizni yozib qoldiring.");
 
     if (contactData[text]) return ctx.reply(contactData[text]);
     if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text]);
+    if (mahallalar7[text]) return ctx.reply(mahallalar7[text]);
     
     if (loyihalarHaqida[text]) {
         const p = loyihalarHaqida[text];
@@ -257,19 +252,23 @@ if (ctx.chat.type !== "private") {
         return ctx.reply(p.info);
     }
 
+    // 4. Admin maxsus buyruqlari
     if (isAdmin) {
         if (text === "📊 Statistika") return ctx.reply("👤 Userlar: " + userDatabase.size + "\n👥 Guruhlar: " + chatDatabase.size);
         if (text === "⚠️ Ogohlantirishlar") return ctx.reply("⚠️ Warns ro'yxati: " + JSON.stringify(warns, null, 2));
     }
 
-    const reservedButtons = ["Yordam", "Haqida", "Loyihalar", "✍️ Adminga murojaat", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar"];
+    // 5. Murojaat yuborish (Faqat oddiy foydalanuvchilar va tekst bo'lsa)
+    const reservedButtons = ["Yordam", "Haqida", "Loyihalar", "✍️ Adminga murojaat", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar", "Mahalla yettiligi"];
     if (!isAdmin && ctx.chat.type === "private" && !reservedButtons.includes(text) && !contactData[text] && !haqidaMenu[text] && !loyihalarHaqida[text]) {
         const now = Date.now();
-        if (now - (lastMessages[userId] || 0) < 86400000) return ctx.reply("Kuniga faqat 1 marta murojaat yuborish mumkin.");
+        if (lastMessages[userId] && (now - lastMessages[userId] < 86400000)) {
+            return ctx.reply("Kuniga faqat 1 marta murojaat yuborish mumkin.");
+        }
         
         for (const adminId of ADMINS) {
             try {
-                const info = "📩 <b>Yangi murojaat!</b>\n\nKimdan: " + ctx.from.first_name + "\nID: " + userId + "\n\nXabar:";
+                const info = `📩 <b>Yangi murojaat!</b>\n\nKimdan: ${ctx.from.first_name}\nID: ${userId}\n\nXabar:`;
                 await bot.api.sendMessage(adminId, info, { parse_mode: "HTML" });
                 await bot.api.copyMessage(adminId, ctx.chat.id, ctx.message.message_id);
             } catch (e) {}
@@ -281,4 +280,3 @@ if (ctx.chat.type !== "private") {
 });
 
 bot.start();
-
