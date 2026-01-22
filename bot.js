@@ -57,8 +57,8 @@ const saveData = () => {
     fs.writeFileSync(LAST_MSG_FILE, JSON.stringify(lastMessages));
 };
 
-const userKeyboard = new Keyboard().text("Yordam").text("Haqida").row().text("✍️ Adminga murojaat").resized();
-const adminKeyboard = new Keyboard().text("Yordam").text("Haqida").row().text("📊 Statistika").text("⚠️ Ogohlantirishlar").row().text("📢 Yangilik").resized();
+const userKeyboard = new Keyboard().text("Mahallalar").text("Ma'lumot").resized();
+const adminKeyboard = new Keyboard().text("Mahallalar").text("Ma'lumot").row().text("📊 Statistika").text("⚠️ Ogohlantirishlar").row().text("📢 Yangilik").resized();
 
 const mahallalar = new Keyboard()
     .text("8-mart").text("Buston").row()
@@ -237,8 +237,8 @@ bot.on("message", async (ctx) => {
         const kb = isAdmin ? adminKeyboard : userKeyboard;
         return ctx.reply("Asosiy menyu.", { reply_markup: kb });
     }
-    if (text === "Yordam") return ctx.reply("Mahallani tanlang:", { reply_markup: mahallalar });
-    if (text === "Haqida") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
+    if (text === "Mahallalar") return ctx.reply("Mahallani tanlang:", { reply_markup: mahallalar });
+    if (text === "Ma'lumot") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
     if (text === "Loyihalar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
     if (text === "Mahalla yettiligi") return ctx.reply("Yettilik a'zosini tanlang:", { reply_markup: mahallayYettiligiKB });
     if (text === "✍️ Adminga murojaat") return ctx.reply("Murojaatingizni yozib qoldiring.");
@@ -303,4 +303,3 @@ app.listen(PORT, "0.0.0.0", async () => {
         console.error("❌ Botni ishga tushirishda texnik xato:", err);
     }
 });
-
