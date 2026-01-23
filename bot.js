@@ -1,25 +1,19 @@
-require('dotenv').config(); // Dotenv paketini chaqiramiz
+require('dotenv').config();
 const express = require("express");
 const { Bot, Keyboard, InputFile } = require("grammy");
 const fs = require("fs");
 
 const app = express();
-// Environment'dan o'qiymiz, agar bo'lmasa 3000 ni oladi
 const PORT = process.env.PORT || 3000; 
 
-// Adminlarni raqam (Number) ko'rinishida olish
 const MAIN_ADMIN = Number(process.env.MAIN_ADMIN);
 const PROMO_ADMIN = Number(process.env.PROMO_ADMIN);
 const ADMIN = Number(process.env.ADMIN);
 const ADMINS = [MAIN_ADMIN, PROMO_ADMIN, ADMIN];
 const LOG_GROUP_ID = Number(process.env.LOG_GROUP_ID); 
 
-// Bot tokenini Environment'dan olish
 const bot = new Bot(process.env.BOT_TOKEN);
 
-// ... qolgan kodlar o'zgarishsiz qoladi
-
-// --- Xatoliklarni ushlash (Bot o'chib qolmasligi uchun) ---
 bot.catch((err) => {
     console.error(`Error in middleware:`, err.error);
 });
@@ -108,7 +102,7 @@ const contactData = {
     "Bog'i surh": "Arabova Mohira Karimovna \n +998931673777",
     "Chotqol": "Xayrullayev Durbek Ubaydulla o'g'li \n +998930050851",
     "Do'stlik": "Rustamova Ruxsora Sobirjon qizi \n +998943239503",
-    "Go'zal": "Abduqaxxarov Dilmurod Umarali o'g'li \n +998991713676",
+    "Go'zal": "Yoshlar yetakchisi: Abduqaxxarov Dilmurod Umarali o'g'li \n +998991713676",
     "G'afur G'ulom": "Rais: Zakirova Gulchexra Hayitbayevna +998942186775 \n Hokim yordamchisi: Go'rog'liyev Bekmurod Sultonmurod og'li +998949909601 \n Xotin qizlar faoli: Mirzaliyeva Nargiza Ismailldjanovna +998944262216 \n Yoshlar yetakchisi: Yuldashaliyev Ixtiyar Baxtiyarovich +998900938600 \n Profilaktika inspektori: Yarkulov Sirojiddin Erkinboy o'g'li +998941649922 \n Ijtimoiy xodim: Isambayeva Muyassar Saparovna +998943603673 \n Soliq xodimi: Sanaqulov Ulug'bek To'ychi o'g'li +998909481212",
     "Grum": "Qarshiboyev Sanjar Abdug'ani o'g'li",
     "Gulbog'": "Abdumannobov Doston Davrom o'g'li \n +998940146144",
@@ -184,14 +178,12 @@ bot.command("send", async (ctx) => {
     await ctx.reply("✅ Yetkazildi: " + ok);
 });
 
-// --- ASOSIY MESSAGE HANDLER ---
 bot.on("message", async (ctx) => {
     if (!ctx.from) return;
     const userId = ctx.from.id;
     const text = ctx.message.text || "";
     const isAdmin = ADMINS.includes(userId);
 
-    // 1. Guruhlardagi spamni tekshirish
     if (ctx.chat.type !== "private") {
         let isSpam = false;
         let reason = "";
@@ -216,10 +208,9 @@ bot.on("message", async (ctx) => {
                 return ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
             }
         }
-        return; // Guruhlarda boshqa buyruqlar ishlamasin
+        return;
     }
 
-    // 2. Admin javobi (Reply orqali)
     if (isAdmin && ctx.message.reply_to_message) {
         const replyText = ctx.message.reply_to_message.text || "";
         const match = replyText.match(/ID:\s*(\d+)/);
@@ -232,7 +223,6 @@ bot.on("message", async (ctx) => {
         }
     }
 
-    // 3. Menyu buyruqlari
     if (text === "⬅️ Orqaga") {
         const kb = isAdmin ? adminKeyboard : userKeyboard;
         return ctx.reply("Asosiy menyu.", { reply_markup: kb });
@@ -241,7 +231,6 @@ bot.on("message", async (ctx) => {
     if (text === "Ma'lumot") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
     if (text === "Loyihalar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
     if (text === "Mahalla yettiligi") return ctx.reply("Yettilik a'zosini tanlang:", { reply_markup: mahallayYettiligiKB });
-    if (text === "✍️ Adminga murojaat") return ctx.reply("Murojaatingizni yozib qoldiring.");
 
     if (contactData[text]) return ctx.reply(contactData[text]);
     if (haqidaMenu[text]) return ctx.reply(haqidaMenu[text]);
@@ -255,44 +244,19 @@ bot.on("message", async (ctx) => {
         return ctx.reply(p.info);
     }
 
-    // 4. Admin maxsus buyruqlari
     if (isAdmin) {
         if (text === "📊 Statistika") return ctx.reply("👤 Userlar: " + userDatabase.size + "\n👥 Guruhlar: " + chatDatabase.size);
         if (text === "⚠️ Ogohlantirishlar") return ctx.reply("⚠️ Warns ro'yxati: " + JSON.stringify(warns, null, 2));
     }
-
-    // 5. Murojaat yuborish (Faqat oddiy foydalanuvchilar va tekst bo'lsa)
-    // const reservedButtons = ["Yordam", "Haqida", "Loyihalar", "⬅️ Orqaga", "📊 Statistika", "⚠️ Ogohlantirishlar", "Mahalla yettiligi"];
-    // if (!isAdmin && ctx.chat.type === "private" && !reservedButtons.includes(text) && !contactData[text] && !haqidaMenu[text] && !loyihalarHaqida[text]) {
-    //     const now = Date.now();
-    //     if (lastMessages[userId] && (now - lastMessages[userId] < 86400000)) {
-    //         return ctx.reply("Kuniga faqat 1 marta murojaat yuborish mumkin.");
-    //     }
-        
-    //     for (const adminId of ADMINS) {
-    //         try {
-    //             const info = `📩 <b>Yangi murojaat!</b>\n\nKimdan: ${ctx.from.first_name}\nID: ${userId}\n\nXabar:`;
-    //             await bot.api.sendMessage(adminId, info, { parse_mode: "HTML" });
-    //             await bot.api.copyMessage(adminId, ctx.chat.id, ctx.message.message_id);
-    //         } catch (e) {}
-    //     }
-    //     lastMessages[userId] = now;
-    //     saveData();
-    //     return ctx.reply("Murojaatingiz adminga yuborildi.");
-    // }
 });
 
-// --- SERVER VA BOTNI ISHGA TUSHIRISH ---
 app.listen(PORT, "0.0.0.0", async () => {
     console.log(`✅ Server ${PORT}-portda ishga tushdi`);
     
     try {
-        // 1. Eski webhook yoki polling ulanishlarini tozalash (409 xatosini oldini oladi)
-        // drop_pending_updates: true - bot o'chiq turganda kelgan xabarlarni o'chirib yuboradi
         await bot.api.deleteWebhook({ drop_pending_updates: true });
-        console.log("🔄 Eski ulanishlar tozalandi va navbatdagi xabarlar yuborildi.");
+        console.log("🔄 Eski ulanishlar tozalandi.");
 
-        // 2. Botni start qilish
         bot.start({
             onStart: (me) => {
                 console.log(`🤖 Bot @${me.username} sifatida muvaffaqiyatli ishga tushdi`);
