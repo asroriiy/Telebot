@@ -102,7 +102,7 @@ const contactData = {
     "Bog'i surh": "Arabova Mohira Karimovna \n +998931673777",
     "Chotqol": "Xayrullayev Durbek Ubaydulla o'g'li \n +998930050851",
     "Do'stlik": "Rustamova Ruxsora Sobirjon qizi \n +998943239503",
-    "Go'zal": "Rais: Dushayeva Xurshida Mamatovna +998770684004 \n  Yoshlar yetakchisi: Abduqaxxarov Dilmurod Umarali o'g'li \n +998991713676",
+    "Go'zal": "Rais: Dushayeva Xurshida Mamatovna +998770684004 \n Hokim yordamchisi: Murodov Dilmurod Manazarovich +998933149000 \n Xotin-qizlar faoli: Jo'rayeva Komila Shodiyorovna +998939992808 \n Yoshlar yetakchisi: Abduqaxxarov Dilmurod Umarali o'g'li +998991713676 \n Profilaktika inspektori: Shodiyev Umar Samidjanovich +998931895722 \n Ijtimoiy xodim: ",
     "G'afur G'ulom": "Rais: Zakirova Gulchexra Hayitbayevna +998942186775 \n Hokim yordamchisi: Go'rog'liyev Bekmurod Sultonmurod og'li +998949909601 \n Xotin qizlar faoli: Mirzaliyeva Nargiza Ismailldjanovna +998944262216 \n Yoshlar yetakchisi: Yuldashaliyev Ixtiyar Baxtiyarovich +998900938600 \n Profilaktika inspektori: Yarkulov Sirojiddin Erkinboy o'g'li +998941649922 \n Ijtimoiy xodim: Isambayeva Muyassar Saparovna +998943603673 \n Soliq xodimi: Sanaqulov Ulug'bek To'ychi o'g'li +998909481212",
     "Grum": "Qarshiboyev Sanjar Abdug'ani o'g'li",
     "Gulbog'": "Abdumannobov Doston Davrom o'g'li \n +998940146144",
@@ -154,7 +154,8 @@ const mahallalar7 = {
     "Hokim yordamchisi": "Ishsiz fuqarolarga ish topishda yordam ko‘rsatish, bandlik masalalarini hal qilish.",
     "Yoshlar yetakchisi": "Yoshlarni sport, musiqa va turli to‘garaklarga jalb qilish orqali bo‘sh vaqtni mazmunli o‘tkazishni ta’minlash.",
     "Xotin-qizlar faoli": "Ayollarni tadbirkorlik, kasanachilik va hunarmandchilikka jalb qilish orqali ularning iqtisodiy ahvolini yaxshilash.",
-    "Profilaktika inspektori": "Soliq bazasini kengaytirish, tadbirkorlik faoliyatini qonuniylashtirish va o‘zini o‘zi band qilganlarni kichik biznes toifasiga o‘tkazishga ko‘maklashish.",
+    "Profilaktika inspektori": "Mahallada huquqbuzarliklarning oldini olish, jamoat tartibini saqlash va fuqarolar xavfsizligini ta’minlash.",
+    "Soliq inspektori": "Soliq bazasini kengaytirish, tadbirkorlik faoliyatini qonuniylashtirish va o‘zini o‘zi band qilganlarni kichik biznes toifasiga o‘tkazishga ko‘maklashish.",
     "Ijtimoiy xodim": "Yolg‘iz keksalar, nogironlar va boshqa muhtojlarga ijtimoiy xizmat ko‘rsatish bilan shug‘ullanish."
 };
 
@@ -244,7 +245,7 @@ app.use("/webhook", webhookCallback(bot, "express"));
 app.listen(PORT, "0.0.0.0", async () => {
     console.log(`✅ Server running on port ${PORT}`);
     try {
-        const domain = "https://telebot-15k8.onrender.com"; 
+        const domain = "https://your-app-name.onrender.com"; 
         await bot.api.setWebhook(`${domain}/webhook`, {
             drop_pending_updates: true,
             allowed_updates: ["message", "callback_query", "chat_member"]
@@ -254,4 +255,3 @@ app.listen(PORT, "0.0.0.0", async () => {
         console.error("❌ Webhook setup error:", err);
     }
 });
-
