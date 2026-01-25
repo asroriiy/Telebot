@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require("express");
-const { Bot, Keyboard, InputFile } = require("grammy");
+const { Bot, Keyboard, InputFile, webhookCallback } = require("grammy");
 const fs = require("fs");
 
 const app = express();
@@ -102,7 +102,7 @@ const contactData = {
     "Bog'i surh": "Arabova Mohira Karimovna \n +998931673777",
     "Chotqol": "Xayrullayev Durbek Ubaydulla o'g'li \n +998930050851",
     "Do'stlik": "Rustamova Ruxsora Sobirjon qizi \n +998943239503",
-    "Go'zal": "Yoshlar yetakchisi: Abduqaxxarov Dilmurod Umarali o'g'li \n +998991713676",
+    "Go'zal": "Rais: Dushayeva Xurshida Mamatovna +998770684004 \n  Yoshlar yetakchisi: Abduqaxxarov Dilmurod Umarali o'g'li \n +998991713676",
     "G'afur G'ulom": "Rais: Zakirova Gulchexra Hayitbayevna +998942186775 \n Hokim yordamchisi: Go'rog'liyev Bekmurod Sultonmurod og'li +998949909601 \n Xotin qizlar faoli: Mirzaliyeva Nargiza Ismailldjanovna +998944262216 \n Yoshlar yetakchisi: Yuldashaliyev Ixtiyar Baxtiyarovich +998900938600 \n Profilaktika inspektori: Yarkulov Sirojiddin Erkinboy o'g'li +998941649922 \n Ijtimoiy xodim: Isambayeva Muyassar Saparovna +998943603673 \n Soliq xodimi: Sanaqulov Ulug'bek To'ychi o'g'li +998909481212",
     "Grum": "Qarshiboyev Sanjar Abdug'ani o'g'li",
     "Gulbog'": "Abdumannobov Doston Davrom o'g'li \n +998940146144",
@@ -208,19 +208,7 @@ bot.on("message", async (ctx) => {
                 return ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
             }
         }
-        return;
-    }
-
-    if (isAdmin && ctx.message.reply_to_message) {
-        const replyText = ctx.message.reply_to_message.text || "";
-        const match = replyText.match(/ID:\s*(\d+)/);
-        if (match) {
-            const targetId = match[1];
-            try {
-                await bot.api.sendMessage(targetId, "<b>Murojaatingizga javob berildi:</b>\n\n" + text, { parse_mode: "HTML" });
-                return ctx.reply("✅ Javob foydalanuvchiga yuborildi.");
-            } catch (e) { return ctx.reply("❌ Yuborishda xato."); }
-        }
+        return; 
     }
 
     if (text === "⬅️ Orqaga") {
@@ -250,20 +238,19 @@ bot.on("message", async (ctx) => {
     }
 });
 
-app.listen(PORT, "0.0.0.0", async () => {
-    console.log(`✅ Server ${PORT}-portda ishga tushdi`);
-    
-    try {
-        await bot.api.deleteWebhook({ drop_pending_updates: true });
-        console.log("🔄 Eski ulanishlar tozalandi.");
+app.use(express.json());
+app.use("/webhook", webhookCallback(bot, "express"));
 
-        bot.start({
-            onStart: (me) => {
-                console.log(`🤖 Bot @${me.username} sifatida muvaffaqiyatli ishga tushdi`);
-            },
-            allowed_updates: ["message", "callback_query", "chat_member"], 
+app.listen(PORT, "0.0.0.0", async () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    try {
+        const domain = "https://your-app-name.onrender.com"; 
+        await bot.api.setWebhook(`${domain}/webhook`, {
+            drop_pending_updates: true,
+            allowed_updates: ["message", "callback_query", "chat_member"]
         });
+        console.log(`🚀 Webhook set to ${domain}/webhook`);
     } catch (err) {
-        console.error("❌ Botni ishga tushirishda texnik xato:", err);
+        console.error("❌ Webhook setup error:", err);
     }
 });
