@@ -244,7 +244,7 @@ app.use("/webhook", webhookCallback(bot, "express"));
 app.listen(PORT, "0.0.0.0", async () => {
     console.log(`✅ Server running on port ${PORT}`);
     try {
-        const domain = "https://your-app-name.onrender.com"; 
+        const domain = "https://telebot-15k8.onrender.com"; 
         await bot.api.setWebhook(`${domain}/webhook`, {
             drop_pending_updates: true,
             allowed_updates: ["message", "callback_query", "chat_member"]
@@ -254,3 +254,4 @@ app.listen(PORT, "0.0.0.0", async () => {
         console.error("❌ Webhook setup error:", err);
     }
 });
+
