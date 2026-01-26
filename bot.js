@@ -77,12 +77,13 @@ const mahallalar = new Keyboard()
     .text("Yangi hayot").text("Yangiobod").row()
     .text("Yoshlik").row().text("⬅️ Orqaga").resized();
 
-const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("Mahalla yettiligi").text("⬅️ Orqaga").resized();
+const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("Mahalla yettiligi").row().text("⬅️ Orqaga").resized();
 const mahallayYettiligiKB = new Keyboard()
     .text("Rais").row()
     .text("Hokim yordamchisi").row()
     .text("Yoshlar yetakchisi").row()
     .text("Xotin-qizlar faoli").row()
+    .text("Soliq inspektori").row()
     .text("Profilaktika inspektori").row()
     .text("Ijtimoiy xodim").row()
     .text("⬅️ Orqaga").resized();
