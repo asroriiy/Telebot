@@ -220,7 +220,7 @@ bot.on("message", async (ctx) => {
     }
     if (text === "Mahallalar") return ctx.reply("Mahallani tanlang:", { reply_markup: mahallalar });
     if (text === "Ma'lumot") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
-    if (text === "Sardorlik  yo'nalishlar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
+    if (text === "Sardorlik  yo'nalishlari") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
     if (text === "Mahalla yettiligi") return ctx.reply("Yettilik a'zosini tanlang:", { reply_markup: mahallayYettiligiKB });
 
     if (contactData[text]) return ctx.reply(contactData[text]);
@@ -257,5 +257,6 @@ app.listen(PORT, "0.0.0.0", async () => {
         console.error("❌ Webhook setup error:", err);
     }
 });
+
 
 
