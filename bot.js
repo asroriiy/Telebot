@@ -77,7 +77,7 @@ const mahallalar = new Keyboard()
     .text("Yangi hayot").text("Yangiobod").row()
     .text("Yoshlik").row().text("⬅️ Orqaga").resized();
 
-const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Loyihalar").row().text("Mahalla yettiligi").row().text("⬅️ Orqaga").resized();
+const haqidaKeyboard = new Keyboard().text("Yoshlar daftari").row().text("Volontyorlik").row().text("Sardorlik yo'nalishlari").row().text("Mahalla yettiligi").row().text("⬅️ Orqaga").resized();
 const mahallayYettiligiKB = new Keyboard()
     .text("Rais").row()
     .text("Hokim yordamchisi").row()
@@ -140,14 +140,15 @@ const haqidaMenu = {
 };
 
 const loyihalarHaqida = {
-    "Ibrat Farzandlari": { img: "./ibrat.png", info: "Ibrat Farzandlari - xorijiy tillarni onlayn o'rganish platformasi.\nLink: https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari" },
-    "Ustoz AI": { img: "./ustozai.png", info: "Ustoz AI - zamonaviy kasblarni o'rganish platformasi.\nLink: https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai" },
-    "Mutolaa": { img: "./mutolaa.png", info: "Mutolaa - onlayn kutubxonani o'z ichiga olgan kitobxonlik loyihasi.\nLink: https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa" },
-    "Yashil makon": { img: "./yashilmakon.png", info: "Yashil makon - ekologiyani asrash uchun ishlab chiqilgan loyiha." },
-    "Iqtidor": { img: "./iqtidor.png", info: "Iqtidor - iste'dodli yoshlarni aniqlash va qo'llash loyihasi." },
-    "Jasorat": { info: "Jasorat - liderlik va vatanparvarlik loyihasi." },
-    "Qizlar akademiyasi": { img: "./qizlarakademiyasi.png", info: "Qizlar akademiyasi - STEM va kasb-hunar loyihasi." },
-    "Matbuot va media": { info: "Matbuot va media - jurnalistika va media treninglari." }
+    "Bosh sardor" : "Harakat yo‘nalishlari kesimida sardorlar (mahalla, tuman (shahar), hudud, respublika bosqichlarida) ga biriktirilgan vazifalar ijrosini ta'minlashga ko‘maklashish va qo‘llab-quvvatlash, tadbir va loyihalarni yoritilishini ta'minlash, amalga oshirganligi bo‘yicha ma'lumotlarni tayyorlash va taqdim etish, taklif va xulosalarni umumlashtirish, faoliyat jarayonlarini monitoring qiluvchi sardor.",
+    "Ibrat Farzandlari": { img: "./ibrat.png", info: "Bolalar o‘rtasida xorijiy tillarga bo‘lgan qiziqishlarini kuchaytirishga ko‘maklashish, loyihaning targ‘ibot jarayonlarini amalga oshirishni ta'minlash, Ibrat izdoshlari marafonini tashkil qilish, mahalladagi yoshlar yetakchisi bilan birgalikda loyihaning mashg‘ulot xonalarini tashkillashtirish, loyiha ijodkorlari bilan motivasion uchrashuvlar o‘tkazish, “Ibrat academy” ilovasi orqali sertifikatni qo‘lga kiritib, xorijiy tillarni o‘rganayotgan tengdoshlari bilan podkastlar tayyorlash, El-yurt umidi jamg‘armasi stipendiantlari bilan o‘quv-seminarlar tashkil qilish kabi vazifalarni bajaradi. \n Link: https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari" },
+    "Ustoz AI": { img: "./ustozai.png", info: "Bolalarning kasb-hunar, qolaversa, zamonaviy kasblarni o‘rganishga bo‘lgan qiziqishlarini qo‘llab-quvvatlash, shuningdek, 10-18 yoshli bolalar o‘rtasida zamonaviy kasblarni keng targ‘ib qilish va ular o‘rtasida fan olimpiadalari tashkil qilish, mahallalarda yoshlar etakchisi bilan birgalikda “Ustoz AI” burchaklarini tashkil qilish, ijtimoiy himoyaga muhtoj, nogironligi bor bolalar bilan ishlash, tengdosh-tengdoshga tamoyili orqali platformadagi videodarsliklarni o‘rganish jarayonlariga ko‘maklashish, shuningdek, “Ustoz AI” loyihasining targ‘ibot jarayonlarini amalga oshirish kabi vazifalarni bajaradi.\nLink: https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai" },
+    "Mutolaa": { img: "./mutolaa.png", info: "Bolalar o‘rtasida kitobxonlik madaniyatini keng targ‘ib qilish, “Kitobxon millat” umummilliy g‘oyasini singdirish, Mutolaa marafoni loyihasini an'anaviy tarzda, ya'ni jonli holatda sardor o‘zi faoliyat olib borayotgan hudud va undagi ta'lim muassasalarida amalga oshirish, yozuvchi va shoirlar bilan ijodiy uchrashuvlar tashkil qilish, "Farzandimga kitob sovg‘a qilaman" shiori ostida kitob yarmarkalari tashkil qilish, (hududdagi Yoshlar ishlari agentligining Besh tashabbusni muvofiqlashtirish bo‘limi yordamida), jamoat joylarida va bolalar o‘rtasida loyiha flaerlarini tarqatish va bu orqali loyiha qamrab olgan kitobxonlar auditoriyasini kengaytirish kabi vazifalarni bajaradi.\nLink: https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa" },
+    "Yashil makon": { img: "./yashilmakon.png", info: "Bolalar o‘rtasida ekologik madaniyatni targ‘ibotini amalga oshirish, mahallalarni obodonlashtirish va ko‘kalamzorlashtirish ishlarini tashkil qilishda ko‘maklashish, ekologiya va atrof-muhit ifloslanishini oldini olish bo‘yicha tashabbuslar ishlab chiqishga qaratilgan yo‘nalish." },
+    "Iqtidor": { img: "./iqtidor.png", info: "Bolalarning qobiliyatlari va iqtidorlari, qiziqishlarini aniqlash, san'at va madaniyatga oid tadbirlar, ko‘rgazmalar, tanlovlar, va sahna chiqishlari, hayriya tadbirlari va aksiyalarin tashkil etishga qaratilgan yo‘nalish." },
+    "Jasorat": { info: "Bolalarni Vatanga muhabbat, milliy va umuminsoniy qadriyatlarga hurmat ruhida tarbiyalashga ko‘maklashish, sog‘lom turmush tarzini keng targ‘ib qilish, vatanparvarlik tadbirlarini tashkillashtirishga qaratilgan yo‘nalish." },
+    "Qizlar akademiyasi": { img: "./qizlarakademiyasi.png", info: "Qizlarning bo‘sh vaqtlarini mazmunli tashkil qilish hamda vaqtdan unumli foydalanishga targ‘ib qilish, “Qizlar akademiyasi” platformasidagi videodarsliklar orqali kasb-hunar egallashlari mumkinligini o‘rgatish maqsadida loyiha ijodkorlari hamda ma'sullari bilan seminar-treninglar o‘tkazish, darsliklarni muvaffaqiyatli tugatgan qizlarni loyihaning esdalik sovg‘alari bilan taqdirlash jarayonlarini tashkil qilish, jamiyat hayotida o‘z o‘rnini topgan tadbirkorlik faoliyati bilan shug‘ullanib kelayotgan faol xotin-qizlar bilan motivasion uchrashuvlar tashkillashtirish, loyihaning targ‘ibotini doimiy ravishda amalga oshirish kabi vazifalarni bajaradi." },
+    "Matbuot va media": { info: "Bolalar uchun tashkil etilayotgan loyihalarni muntazam ravishda ijtimoiy tarmoqlarda yoritib borish hamda bolalar orasida media yo‘nalishidagi bilim va ko‘nikmalarni rivojlantirishga ko‘maklashadi." }
 };
 
 const mahallalar7 = {
@@ -219,7 +220,7 @@ bot.on("message", async (ctx) => {
     }
     if (text === "Mahallalar") return ctx.reply("Mahallani tanlang:", { reply_markup: mahallalar });
     if (text === "Ma'lumot") return ctx.reply("Bo'limni tanlang:", { reply_markup: haqidaKeyboard });
-    if (text === "Loyihalar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
+    if (text === "Sardorlik  yo'nalishlar") return ctx.reply("Loyihani tanlang:", { reply_markup: loyihalarKB });
     if (text === "Mahalla yettiligi") return ctx.reply("Yettilik a'zosini tanlang:", { reply_markup: mahallayYettiligiKB });
 
     if (contactData[text]) return ctx.reply(contactData[text]);
@@ -256,4 +257,5 @@ app.listen(PORT, "0.0.0.0", async () => {
         console.error("❌ Webhook setup error:", err);
     }
 });
+
 
