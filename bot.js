@@ -142,7 +142,7 @@ const haqidaMenu = {
 const loyihalarHaqida = {
     "Bosh sardor" : { info: "Harakat yo‘nalishlari kesimida sardorlar (mahalla, tuman (shahar), hudud, respublika bosqichlarida) ga biriktirilgan vazifalar ijrosini ta'minlashga ko‘maklashish va qo‘llab-quvvatlash, tadbir va loyihalarni yoritilishini ta'minlash, amalga oshirganligi bo‘yicha ma'lumotlarni tayyorlash va taqdim etish, taklif va xulosalarni umumlashtirish, faoliyat jarayonlarini monitoring qiluvchi sardor." },
     "Ibrat Farzandlari": { img: "./ibrat.png", info: "Bolalar o‘rtasida xorijiy tillarga bo‘lgan qiziqishlarini kuchaytirishga ko‘maklashish, loyihaning targ‘ibot jarayonlarini amalga oshirishni ta'minlash, Ibrat izdoshlari marafonini tashkil qilish, mahalladagi yoshlar yetakchisi bilan birgalikda loyihaning mashg‘ulot xonalarini tashkillashtirish, loyiha ijodkorlari bilan motivasion uchrashuvlar o‘tkazish, “Ibrat academy” ilovasi orqali sertifikatni qo‘lga kiritib, xorijiy tillarni o‘rganayotgan tengdoshlari bilan podkastlar tayyorlash, El-yurt umidi jamg‘armasi stipendiantlari bilan o‘quv-seminarlar tashkil qilish kabi vazifalarni bajaradi. \n Link: https://play.google.com/store/apps/details?id=uz.ibrat.farzandlari" },
-    "Ustoz AI": { img: "./ustozai.png", info: "Bolalarning kasb-hunar, qolaversa, zamonaviy kasblarni o‘rganishga bo‘lgan qiziqishlarini qo‘llab-quvvatlash, shuningdek, 10-18 yoshli bolalar o‘rtasida zamonaviy kasblarni keng targ‘ib qilish va ular o‘rtasida fan olimpiadalari tashkil qilish, mahallalarda yoshlar etakchisi bilan birgalikda “Ustoz AI” burchaklarini tashkil qilish, ijtimoiy himoyaga muhtoj, nogironligi bor bolalar bilan ishlash, tengdosh-tengdoshga tamoyili orqali platformadagi videodarsliklarni o‘rganish jarayonlariga ko‘maklashish, shuningdek, “Ustoz AI” loyihasining targ‘ibot jarayonlarini amalga oshirish kabi vazifalarni bajaradi.\nLink: https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai" },
+    "Ustoz AI": { img: "./ustozai.png", info: "Bolalarning kasb-hunar, qolaversa, zamonaviy kasblarni o‘rganishga bo'lgan qiziqishlarini qo‘llab-quvvatlash, shuningdek, 10-18 yoshli bolalar o‘rtasida zamonaviy kasblarni keng targ‘ib qilish va ular o‘rtasida fan olimpiadalari tashkil qilish, mahallalarda yoshlar etakchisi bilan birgalikda “Ustoz AI” burchaklarini tashkil qilish, ijtimoiy himoyaga muhtoj, nogironligi bor bolalar bilan ishlash, tengdosh-tengdoshga tamoyili orqali platformadagi videodarsliklarni o‘rganish jarayonlariga ko‘maklashish, shuningdek, “Ustoz AI” loyihasining targ‘ibot jarayonlarini amalga oshirish kabi vazifalarni bajaradi.\nLink: https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai" },
     "Mutolaa": { img: "./mutolaa.png", info: "Bolalar o‘rtasida kitobxonlik madaniyatini keng targ‘ib qilish, 'Kitobxon millat' umummilliy g‘oyasini singdirish, Mutolaa marafoni loyihasini an'anaviy tarzda, ya'ni jonli holatda sardor o‘zi faoliyat olib borayotgan hudud va undagi ta'lim muassasalarida amalga oshirish, yozuvchi va shoirlar bilan ijodiy uchrashuvlar tashkil qilish, 'Farzandimga kitob sovg‘a qilaman' shiori ostida kitob yarmarkalari tashkil qilish, (hududdagi Yoshlar ishlari agentligining Besh tashabbusni muvofiqlashtirish bo‘limi yordamida), jamoat joylarida va bolalar o‘rtasida loyiha flaerlarini tarqatish va bu orqali loyiha qamrab olgan kitobxonlar auditoriyasini kengaytirish kabi vazifalarni bajaradi.\nLink: https://play.google.com/store/apps/details?id=uz.mutolaa.commercial.mutolaa" },
     "Yashil makon": { img: "./yashilmakon.png", info: "Bolalar o‘rtasida ekologik madaniyatni targ‘ibotini amalga oshirish, mahallalarni obodonlashtirish va ko‘kalamzorlashtirish ishlarini tashkil qilishda ko‘maklashish, ekologiya va atrof-muhit ifloslanishini oldini olish bo‘yicha tashabbuslar ishlab chiqishga qaratilgan yo‘nalish." },
     "Iqtidor": { img: "./iqtidor.png", info: "Bolalarning qobiliyatlari va iqtidorlari, qiziqishlarini aniqlash, san'at va madaniyatga oid tadbirlar, ko‘rgazmalar, tanlovlar, va sahna chiqishlari, hayriya tadbirlari va aksiyalarin tashkil etishga qaratilgan yo‘nalish." },
@@ -204,12 +204,15 @@ bot.on("message", async (ctx) => {
         if (isSpam) {
             const member = await ctx.getChatMember(userId);
             const isGroupAdmin = ["administrator", "creator"].includes(member.status);
-            if (!isGroupAdmin) {
-                warns[userId] = (warns[userId] || 0) + 1;
-                saveData();
+            
+            warns[userId] = (warns[userId] || 0) + 1;
+            saveData();
+            
+            const logMsg = `🛡 <b>Xavfsizlik tizimi:</b>\n\n👤 Foydalanuvchi: ${ctx.from.first_name}\n🆔 ID: <code>${userId}</code>\n⚠️ Sabab: ${reason}\n📈 Jami ogohlantirishlar: ${warns[userId]}\n📍 Guruh: ${ctx.chat.title}`;
+            await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
+
+            if (!isGroupAdmin && !isAdmin) {
                 await ctx.deleteMessage().catch(() => {});
-                const logMsg = `🛡 <b>Xavfsizlik tizimi:</b>\n\n👤 Foydalanuvchi: ${ctx.from.first_name}\n🆔 ID: <code>${userId}</code>\n⚠️ Sabab: ${reason}\n📈 Jami ogohlantirishlar: ${warns[userId]}\n📍 Guruh: ${ctx.chat.title}`;
-                await bot.api.sendMessage(LOG_GROUP_ID, logMsg, { parse_mode: "HTML" }).catch(() => {});
                 return ctx.reply(`⚠️ ${ctx.from.first_name}, ${reason} taqiqlangan! (Ogohlantirish: ${warns[userId]})`);
             }
         }
