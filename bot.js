@@ -128,10 +128,17 @@ bot.on("message", async (ctx) => {
     if (contactData[text]) return ctx.reply(contactData[text]);
 });
 
+// ... (rest of your code)
+
 app.use("/webhook", webhookCallback(bot, "express"));
 
 app.listen(PORT, "0.0.0.0", async () => {
     try {
-        await bot.api.setWebhook(`https://telebot-15k8.onrender.com/webhook`, { drop_pending_updates: true });
-    } catch (err) {}
+        // EDIT THIS LINE ONLY: Change 'telebot-15k8' to your new name
+        await bot.api.setWebhook(`https://angren_rasmiy.onrender.com/webhook`, { drop_pending_updates: true });
+        console.log("✅ Webhook updated successfully!");
+    } catch (err) {
+        console.error("❌ Webhook error:", err);
+    }
 });
+
