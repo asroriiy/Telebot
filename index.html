@@ -29,38 +29,48 @@
             background-color: var(--primary);
             color: var(--white);
             width: 100%;
-            padding: 1rem 0;
-            text-align: center;
+            padding: 1rem 5%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+        header .logo-area {
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
         header img {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            transition-duration: .5s;
             object-fit: cover;
+            cursor: pointer;
         }
-        header img:hover { transform: scale(1.1); }
-        header img:active { transform: scale(0.9); }
-
+        .profile-trigger {
+            cursor: pointer;
+            text-align: right;
+        }
+        .profile-name {
+            font-weight: bold;
+            text-decoration: underline;
+            font-size: 0.95rem;
+        }
         .container {
             width: 90%;
             max-width: 600px;
             margin: 20px auto;
             background: var(--white);
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 15px;
         }
         button {
             padding: 15px 10px;
@@ -70,14 +80,24 @@
             color: white;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s, background 0.2s;
+            transition: transform 0.1s;
             font-size: 0.9rem;
         }
-        button:hover { background-color: #2980b9; }
         button:active { transform: scale(0.98); }
         .back-btn { background-color: #e67e22; grid-column: span 2; }
         .murojaat-btn { background-color: var(--success); grid-column: span 2; margin-top: 10px; }
+        .logout-btn { background-color: #c0392b; margin-top: 20px; width: 100%; }
         
+        input, textarea, select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        .hidden { display: none !important; }
         .content-area {
             margin-bottom: 20px;
             line-height: 1.6;
@@ -86,39 +106,75 @@
             padding-left: 15px;
             display: none;
         }
-        #title-display { font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 1.2rem; }
-        
-        form { display: flex; flex-direction: column; gap: 15px; }
-        label { font-weight: bold; font-size: 0.9rem; }
-        input, textarea, select {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            width: 100%;
-            box-sizing: border-box;
+        #my-complaints-list {
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
         }
-        .loading { opacity: 0.5; pointer-events: none; }
-        .hidden { display: none; }
+        .complaint-card {
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="./logo.png" alt="Logo">
-    <h1>Mahalla Yoshlar Portali</h1>
+    <div class="logo-area">
+        <img src="./logo.png" alt="Logo" onclick="showMenu('main')">
+        <h1 style="font-size: 1.1rem; margin:0;">Mahalla Portali</h1>
+    </div>
+    <div class="profile-trigger" onclick="handleProfileClick()">
+        <span id="header-user-name" class="profile-name">Kirish</span>
+    </div>
 </header>
 
 <div class="container">
     <div id="display-box" class="content-area">
-        <div id="title-display"></div>
+        <div id="title-display" style="font-weight:bold; color:var(--primary);"></div>
         <div id="text-display"></div>
+    </div>
+
+    <div id="login-menu" class="hidden">
+        <h2 style="text-align:center">Kirish</h2>
+        <input type="tel" id="login-phone" placeholder="Telefon (+998...)">
+        <input type="password" id="login-pass" placeholder="Parol">
+        <button style="width:100%" onclick="login()">Kirish</button>
+        <p style="text-align:center; color:var(--accent); cursor:pointer" onclick="showMenu('register')">Ro'yxatdan o'tish</p>
+    </div>
+
+    <div id="register-menu" class="hidden">
+        <h2 style="text-align:center">Ro'yxatdan o'tish</h2>
+        <input type="tel" id="reg-phone" placeholder="Telefon raqamingiz">
+        <button id="send-otp-btn" style="width:100%" onclick="sendOTP()">Kod yuborish</button>
+        <div id="otp-section" class="hidden">
+            <input type="number" id="reg-otp" placeholder="5 xonali kod">
+            <input type="text" id="reg-name" placeholder="F.I.SH">
+            <input type="password" id="reg-pass" placeholder="Parol (min. 6 xona)">
+            <button style="width:100%; background-color:var(--success)" onclick="verifyAndRegister()">Tasdiqlash</button>
+        </div>
+    </div>
+
+    <div id="profile-panel" class="hidden">
+        <h2 id="panel-name">Foydalanuvchi</h2>
+        <hr>
+        <h3>Mening murojaatlarim:</h3>
+        <div id="my-complaints-list"></div>
+        <div id="no-complaints" class="hidden">
+            <p>Sizda hozircha murojaatlar yo'q.</p>
+        </div>
+        <button class="murojaat-btn" onclick="checkLimitAndShowMurojaat()">Yangi murojaat yo'llash</button>
+        <button class="logout-btn" onclick="logout()">Chiqish</button>
+        <button class="back-btn" onclick="showMenu('main')">Asosiy menyu</button>
     </div>
 
     <div id="main-menu" class="menu-grid">
         <button onclick="showMenu('mahallalar')">Mahallalar</button>
         <button onclick="showMenu('malumot')">Ma'lumot</button>
-        <button class="murojaat-btn" onclick="showMenu('murojaat')">✍️ Murojaat yo'llash</button>
+        <button class="murojaat-btn" onclick="checkLimitAndShowMurojaat()">✍️ Murojaat yo'llash</button>
     </div>
 
     <div id="mahallalar-menu" class="menu-grid hidden"></div>
@@ -134,24 +190,15 @@
     <div id="murojaat-menu" class="hidden">
         <h2 style="text-align:center">Murojaat yuborish</h2>
         <form id="complaintForm">
-            <label>F.I.SH (To'liq ismingiz):</label>
-            <input type="text" name="fullname" id="fullname" required placeholder="Ism familiya">
-            
-            <label>Telefon raqamingiz:</label>
-            <input type="tel" name="phone" id="phone" required placeholder="+998">
-            
             <label>Mahallangiz:</label>
             <select name="mahalla" id="user-mahalla" required>
                 <option value="">Tanlang...</option>
             </select>
-
-            <label>Foto yoki Video yuklang (Ixtiyoriy):</label>
+            <label>Foto/Video (Ixtiyoriy):</label>
             <input type="file" name="evidence" id="evidence" accept="image/*,video/*">
-
             <label>Murojaat matni:</label>
             <textarea name="text" id="complaintText" rows="5" required placeholder="Shikoyat matni..."></textarea>
-
-            <button type="submit" id="submitBtn" style="background-color: var(--success);">Yuborish</button>
+            <button type="submit" id="submitBtn" style="background-color: var(--success); width:100%;">Yuborish</button>
             <button type="button" class="back-btn" onclick="showMenu('main')">⬅️ Orqaga</button>
         </form>
     </div>
@@ -161,14 +208,12 @@
 </div>
 
 <script>
+    let currentUser = JSON.parse(localStorage.getItem('portalUser')) || null;
     const contactData = {"8-mart":"Mirmusayev Shaxzodbek \n +998940341000","Buston":"Abdurahatov Shoxrux \n +998994631289","Dorilfunun":"Ashurov Xasanbek \n +998944544411","Lashkarak":"Mirzakarimov Bexzod \n +998999720860","Samarchuq":"Qo'chqorov Sardor \n +998945187727","Ulug'bek":"Rais: Hayitqulova Ra'no +998944260725","Xakkarman":"Azimjonov Olimjon \n +998992615111","Bobotog'":"Muxitdinov Shoxruxbek \n +998331777723","Beruniy":"Rais: Zakirov Abduvohid +998993666715","Bog'i surh":"Arabova Mohira \n +998931673777","Chotqol":"Xayrullayev Durbek \n +998930050851","Do'stlik":"Rustamova Ruxsora \n +998943239503","Go'zal":"Rais: Dushayeva Xurshida +998770684004","G'afur G'ulom":"Rais: Zakirova Gulchexra +998942186775","Grum":"Qarshiboyev Sanjar","Gulbog'":"Abdumannobov Doston \n +998940146144","Gulzor":"Axmedov Islombek \n +998943141144","Istiqbol":"Rais: Nishanova Maxmuda +998901747478","Istiqlol":"Akromjonov Temurmalik \n +998944041016","Jigariston":"Rais: Babaraximova Mehriniso +998949321055","Karvon":"Boymatjonov Ahror \n +998945554045","Kimyogar":"Mingboyev Ma'ruf \n +998931690914","Ko'k terak":"Axmedov Sulton \n +998990017144","Maydon":"Rais: Mengliyev Ixtibor +998936075351","Mustaqillik":"Qurbonqulov Umidjon \n +998931873673","Namuna":"Abdumalikov Sardor \n +998932829657","Navbahor":"Saydraxmanov Doston \n +998990996116","Navro'z-1":"Rais: Kaykieva Xafiza +998994004333","Nurchi":"Ashurboyev Asilbek \n +998936662124","Obliq":"Nazmiddinxonov Zayniddinxon \n +998949323130","Obod":"Rais: Eshmuratov Xusnutdin +998931723680","Oppartak":"Siddikov Samandar \n +998949444740","Ozodlik":"Quvonov Ixtiyor \n +998943632334","Qorabog'":"Umirzakov Axror \n +998949265401","Sog'lom":"Matxoliqov Javlon +998931738419","Taraqqiyot":"Roxatillayev Sherzodbek \n +998936273815","YABS":"Axmedov Jahongir \n +998949253675","Yangi go'shtsoy":"Mamasodikov Doston \n +998997259299","Yangi hayot":"Jamolov Avazbek \n +998885449898","Yangiobod":"Barkinov Farrux \n +998991074167","Yoshlik":"Chorshanbiyev Qudrat \n +998936004294"};
     const malumotData = {"Yoshlar daftari": "14-30 yoshgacha.", "Volontyorlik": "Ko'ngilli xizmat."};
-    const loyihalarData = {"Ibrat Farzandlari": "Tillar platformasi.", "Ustoz AI": "Kasblar platformasi."};
-    const yettilikData = {"Rais": "Mahalla nazorati."};
+    const menus = ['main-menu', 'mahallalar-menu', 'malumot-menu', 'loyihalar-menu', 'yettilik-menu', 'murojaat-menu', 'login-menu', 'register-menu', 'profile-panel'];
 
-    const menus = ['main-menu', 'mahallalar-menu', 'malumot-menu', 'loyihalar-menu', 'yettilik-menu', 'murojaat-menu'];
-
-    function initMenus() {
+    function init() {
         const mDiv = document.getElementById('mahallalar-menu');
         const mSelect = document.getElementById('user-mahalla');
         Object.keys(contactData).sort().forEach(key => {
@@ -181,62 +226,131 @@
             mSelect.appendChild(opt);
         });
         appendBackButton(mDiv, 'main');
-        appendBackButton(document.getElementById('loyihalar-menu'), 'malumot');
-        appendBackButton(document.getElementById('yettilik-menu'), 'malumot');
+        updateHeader();
     }
 
-    function appendBackButton(parent, target) {
-        let btn = document.createElement('button');
-        btn.innerText = "⬅️ Orqaga"; btn.className = "back-btn";
-        btn.onclick = () => showMenu(target);
-        parent.appendChild(btn);
+    function updateHeader() {
+        document.getElementById('header-user-name').innerText = currentUser ? currentUser.fullname : "Kirish";
     }
 
-    function showMenu(menuId) {
+    function showMenu(id) {
         menus.forEach(m => document.getElementById(m).classList.add('hidden'));
-        document.getElementById(menuId + '-menu').classList.remove('hidden');
+        document.getElementById(id + (id.includes('-') ? '' : '-menu')).classList.remove('hidden');
         document.getElementById('display-box').style.display = 'none';
-        window.scrollTo(0,0);
     }
 
-    function showData(key, type) {
-        let text = (type === 'contact') ? contactData[key] : (type === 'loyihalar') ? loyihalarData[key] : (type === 'yettilik') ? yettilikData[key] : malumotData[key];
-        document.getElementById('title-display').innerText = key;
-        document.getElementById('text-display').innerText = text;
-        document.getElementById('display-box').style.display = 'block';
-        window.scrollTo(0,0);
+    function handleProfileClick() {
+        if (!currentUser) showMenu('login');
+        else showProfile();
+    }
+
+    async function login() {
+        const phone = document.getElementById('login-phone').value;
+        const pass = document.getElementById('login-pass').value;
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ phone, pass })
+        });
+        const data = await res.json();
+        if (data.success) {
+            currentUser = data.user;
+            localStorage.setItem('portalUser', JSON.stringify(data.user));
+            location.reload();
+        } else alert("Xato telefon yoki parol!");
+    }
+
+    function logout() {
+        localStorage.removeItem('portalUser');
+        location.reload();
+    }
+
+    async function sendOTP() {
+        const phone = document.getElementById('reg-phone').value;
+        const res = await fetch('/api/send-otp', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ phone })
+        });
+        if (res.ok) {
+            document.getElementById('otp-section').classList.remove('hidden');
+            document.getElementById('send-otp-btn').classList.add('hidden');
+            alert("Bot orqali tasdiqlash kodi yuborildi!");
+        }
+    }
+
+    async function verifyAndRegister() {
+        const payload = {
+            phone: document.getElementById('reg-phone').value,
+            otp: document.getElementById('reg-otp').value,
+            fullname: document.getElementById('reg-name').value,
+            password: document.getElementById('reg-pass').value
+        };
+        if (payload.password.length < 6) return alert("Parol 6 tadan ko'p bo'lsin!");
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            alert("Ro'yxatdan o'tdingiz!");
+            location.reload();
+        } else alert("Kod xato yoki raqam band!");
+    }
+
+    async function showProfile() {
+        showMenu('profile');
+        document.getElementById('panel-name').innerText = currentUser.fullname;
+        const res = await fetch(`/api/my-complaints?phone=${currentUser.phone}`);
+        const complaints = await res.json();
+        const list = document.getElementById('my-complaints-list');
+        list.innerHTML = "";
+        if (complaints.length === 0) document.getElementById('no-complaints').classList.remove('hidden');
+        else {
+            document.getElementById('no-complaints').classList.add('hidden');
+            complaints.forEach(c => {
+                let div = document.createElement('div');
+                div.className = "complaint-card";
+                div.innerHTML = `<b>Sana:</b> ${new Date(c.date).toLocaleDateString()}<br>${c.text}`;
+                list.appendChild(div);
+            });
+        }
+    }
+
+    async function checkLimitAndShowMurojaat() {
+        if (!currentUser) return showMenu('login');
+        const res = await fetch(`/api/check-limit?phone=${currentUser.phone}`);
+        const data = await res.json();
+        if (data.allowed) showMenu('murojaat');
+        else alert("Siz bugun murojaat yuborgansiz. 24 soatdan keyin qayta urunib ko'ring.");
     }
 
     document.getElementById('complaintForm').onsubmit = async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn');
         const formData = new FormData(e.target);
-        
-        btn.innerText = "Yuborilmoqda...";
-        btn.parentElement.classList.add('loading');
-
-        try {
-            const response = await fetch('/api/murojaat', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                alert("Murojaat muvaffaqiyatli yuborildi!");
-                e.target.reset();
-                showMenu('main');
-            } else {
-                throw new Error();
-            }
-        } catch (err) {
-            alert("Xatolik yuz berdi. Iltimos keyinroq urunib ko'ring.");
-        } finally {
-            btn.innerText = "Yuborish";
-            btn.parentElement.classList.remove('loading');
+        formData.append('phone', currentUser.phone);
+        formData.append('fullname', currentUser.fullname);
+        const res = await fetch('/api/murojaat', { method: 'POST', body: formData });
+        if (res.ok) {
+            alert("Yuborildi!");
+            location.reload();
         }
     };
 
-    initMenus();
+    function appendBackButton(p, t) {
+        let b = document.createElement('button');
+        b.innerText = "⬅️ Orqaga"; b.className = "back-btn";
+        b.onclick = () => showMenu(t);
+        p.appendChild(b);
+    }
+
+    function showData(k, t) {
+        document.getElementById('title-display').innerText = k;
+        document.getElementById('text-display').innerText = t === 'contact' ? contactData[k] : malumotData[k];
+        document.getElementById('display-box').style.display = 'block';
+    }
+
+    init();
 </script>
 </body>
 </html>
