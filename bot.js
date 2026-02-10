@@ -9,6 +9,7 @@ const app = express();
 const upload = multer({ dest: "uploads/" });
 const PORT = process.env.PORT || 3000; 
 
+// Using your custom Env keys
 const ADMIN_PHONE = process.env.AdminTel;
 const ADMIN_PASS = process.env.AdminPass;
 const LOG_GROUP_ID = Number(process.env.LOG_GROUP_ID); 
@@ -21,12 +22,12 @@ const USERS_FILE = "./users_db.json";
 const COMPLAINTS_FILE = "./complaints_db.json";
 const OTP_CACHE = new Map();
 
-const initFile = (path, initial) => { if (!fs.existsSync(path)) fs.writeFileSync(path, JSON.stringify(initial)); };
+const initFile = (p, i) => { if (!fs.existsSync(p)) fs.writeFileSync(p, JSON.stringify(i)); };
 initFile(USERS_FILE, []);
 initFile(COMPLAINTS_FILE, []);
 
-const getData = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
-const setData = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
+const getData = (f) => JSON.parse(fs.readFileSync(f, "utf8"));
+const setData = (f, d) => fs.writeFileSync(f, JSON.stringify(d, null, 2));
 
 app.post("/api/send-otp", async (req, res) => {
     const { phone } = req.body;
@@ -37,10 +38,11 @@ app.post("/api/send-otp", async (req, res) => {
     const users = getData(USERS_FILE);
     const user = users.find(u => u.phone.replace(/\D/g, "").includes(cleanPhone));
 
+    // Delivers to private message if user started the bot
     if (user && user.chatId) {
         try {
             await bot.api.sendMessage(user.chatId, `🔑 Sayt uchun tasdiqlash kodingiz: ${otp}`);
-        } catch (e) { console.log("Private message failed"); }
+        } catch (e) { console.log("DM failed"); }
     }
     
     await bot.api.sendMessage(LOG_GROUP_ID, `🔑 OTP Log\n📞: ${phone}\n🔢: ${otp}`);
@@ -53,13 +55,11 @@ app.post("/api/register", (req, res) => {
     if (!cached || cached.otp != otp) return res.status(400).json({ msg: "Kod xato" });
     
     let users = getData(USERS_FILE);
-    let userIndex = users.findIndex(u => u.phone === phone);
+    let uIdx = users.findIndex(u => u.phone === phone);
     
-    if (userIndex !== -1 && users[userIndex].password) return res.status(400).json({ msg: "Raqam band" });
-    
-    if (userIndex !== -1) {
-        users[userIndex].fullname = fullname;
-        users[userIndex].password = password;
+    if (uIdx !== -1) {
+        users[uIdx].fullname = fullname;
+        users[uIdx].password = password;
     } else {
         users.push({ phone, fullname, password, joined: Date.now() });
     }
@@ -79,38 +79,23 @@ app.post("/api/login", (req, res) => {
     else res.status(401).json({ success: false });
 });
 
-app.get("/api/check-limit", (req, res) => {
-    const { phone } = req.query;
-    if (phone === ADMIN_PHONE) return res.json({ allowed: true });
-    const complaints = getData(COMPLAINTS_FILE);
-    const last = complaints.filter(c => c.phone === phone).sort((a,b) => b.date - a.date)[0];
-    if (last && (Date.now() - last.date) < 86400000) return res.json({ allowed: false });
-    res.json({ allowed: true });
-});
-
-app.get("/api/my-complaints", (req, res) => {
-    const { phone } = req.query;
-    const complaints = getData(COMPLAINTS_FILE);
-    res.json(complaints.filter(c => c.phone === phone));
-});
-
 app.post("/api/murojaat", upload.single("evidence"), async (req, res) => {
     try {
         const { fullname, phone, mahalla, text } = req.body;
-        const complaints = getData(COMPLAINTS_FILE);
-        complaints.push({ fullname, phone, mahalla, text, date: Date.now() });
-        setData(COMPLAINTS_FILE, complaints);
-        const caption = `📝 WEB MUROJAAT\n👤: ${fullname}\n📞: ${phone}\n📍: ${mahalla}\n📄: ${text}`;
+        const comps = getData(COMPLAINTS_FILE);
+        comps.push({ fullname, phone, mahalla, text, date: Date.now() });
+        setData(COMPLAINTS_FILE, comps);
+        const cap = `📝 WEB MUROJAAT\n👤: ${fullname}\n📞: ${phone}\n📍: ${mahalla}\n📄: ${text}`;
         if (req.file) {
-            const inputFile = new InputFile(req.file.path);
-            req.file.mimetype.startsWith("image") ? await bot.api.sendPhoto(LOG_GROUP_ID, inputFile, { caption }) : await bot.api.sendVideo(LOG_GROUP_ID, inputFile, { caption });
+            const input = new InputFile(req.file.path);
+            req.file.mimetype.startsWith("image") ? await bot.api.sendPhoto(LOG_GROUP_ID, input, { caption: cap }) : await bot.api.sendVideo(LOG_GROUP_ID, input, { caption: cap });
             fs.unlinkSync(req.file.path);
-        } else await bot.api.sendMessage(LOG_GROUP_ID, caption);
+        } else await bot.api.sendMessage(LOG_GROUP_ID, cap);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ success: false }); }
 });
 
-const userKeyboard = new Keyboard().text("Mahallalar").text("Ma'lumot").row().text("👤 Profil").resized();
+const userKB = new Keyboard().text("Mahallalar").text("Ma'lumot").row().text("👤 Profil").resized();
 
 bot.command("start", async (ctx) => {
     await ctx.reply("Assalomu alaykum! Saytdan ro'yxatdan o'tish uchun telefon raqamingizni yuboring.", {
@@ -125,7 +110,7 @@ bot.on("message:contact", async (ctx) => {
     if (user) user.chatId = ctx.from.id;
     else users.push({ phone, chatId: ctx.from.id });
     setData(USERS_FILE, users);
-    await ctx.reply("Raqamingiz ulandi. Endi saytda kod olishingiz mumkin.", { reply_markup: userKeyboard });
+    await ctx.reply("Raqamingiz ulandi. Endi saytda kod olishingiz mumkin.", { reply_markup: userKB });
 });
 
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
@@ -133,5 +118,9 @@ app.get("/logo.png", (req, res) => res.sendFile(path.join(__dirname, "logo.png")
 app.use("/webhook", webhookCallback(bot, "express"));
 
 app.listen(PORT, "0.0.0.0", async () => {
-    await bot.api.setWebhook(`https://angren-rasmiy.onrender.com/webhook`, { drop_pending_updates: true });
+    const hostname = process.env.RENDER_EXTERNAL_HOSTNAME;
+    if (hostname) {
+        await bot.api.setWebhook(`https://${hostname}/webhook`, { drop_pending_updates: true });
+        console.log("✅ Webhook auto-set to: " + hostname);
+    }
 });
