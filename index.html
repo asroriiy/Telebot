@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahalla Yoshlar Portali</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --bg: #f4f7f6;
+            --text: #333;
+            --white: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            background-color: var(--primary);
+            color: var(--white);
+            width: 100%;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--accent);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+            font-size: 0.9rem;
+        }
+        button:hover { background-color: #2980b9; }
+        button:active { transform: scale(0.98); }
+        .back-btn { background-color: #e67e22; grid-column: span 2; }
+        .murojaat-btn { background-color: var(--success); grid-column: span 2; margin-top: 10px; }
+        
+        .content-area {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+            display: none;
+        }
+        #title-display { font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 1.2rem; }
+        
+        form { display: flex; flex-direction: column; gap: 15px; }
+        label { font-weight: bold; font-size: 0.9rem; }
+        input, textarea, select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .loading { opacity: 0.5; pointer-events: none; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Mahalla Yoshlar Portali</h1>
+</header>
+
+<div class="container">
+    <div id="display-box" class="content-area">
+        <div id="title-display"></div>
+        <div id="text-display"></div>
+    </div>
+
+    <div id="main-menu" class="menu-grid">
+        <button onclick="showMenu('mahallalar')">Mahallalar</button>
+        <button onclick="showMenu('malumot')">Ma'lumot</button>
+        <button class="murojaat-btn" onclick="showMenu('murojaat')">✍️ Murojaat yo'llash</button>
+    </div>
+
+    <div id="mahallalar-menu" class="menu-grid hidden"></div>
+
+    <div id="malumot-menu" class="menu-grid hidden">
+        <button onclick="showData('Yoshlar daftari')">Yoshlar daftari</button>
+        <button onclick="showData('Volontyorlik')">Volontyorlik</button>
+        <button onclick="showMenu('loyihalar')">Loyihalar</button>
+        <button onclick="showMenu('yettilik')">Mahalla yettiligi</button>
+        <button class="back-btn" onclick="showMenu('main')">⬅️ Orqaga</button>
+    </div>
+
+    <div id="murojaat-menu" class="hidden">
+        <h2 style="text-align:center">Murojaat yuborish</h2>
+        <form id="complaintForm">
+            <label>F.I.SH (To'liq ismingiz):</label>
+            <input type="text" id="fullname" required placeholder="Ism familiya">
+            
+            <label>Telefon raqamingiz:</label>
+            <input type="tel" id="phone" required placeholder="+998">
+            
+            <label>Mahallangiz:</label>
+            <select id="user-mahalla" required>
+                <option value="">Tanlang...</option>
+            </select>
+
+            <label>Foto yoki Video yuklang (Ixtiyoriy):</label>
+            <input type="file" id="evidence" accept="image/*,video/*">
+
+            <label>Murojaat matni:</label>
+            <textarea id="complaintText" rows="5" required placeholder="Shikoyat matni..."></textarea>
+
+            <button type="submit" id="submitBtn" style="background-color: var(--success);">Yuborish</button>
+            <button type="button" class="back-btn" onclick="showMenu('main')">⬅️ Orqaga</button>
+        </form>
+    </div>
+
+    <div id="loyihalar-menu" class="menu-grid hidden"></div>
+    <div id="yettilik-menu" class="menu-grid hidden"></div>
+</div>
+
+<script>
+    const BOT_TOKEN = "7196410668:AAGG2OFVRwCFoHuiozxgRQTKAgES-GjUWQk";
+    const CHAT_ID = "-1003532684860";
+
+    const contactData = {"8-mart":"Mirmusayev Shaxzodbek \n +998940341000","Buston":"Abdurahatov Shoxrux \n +998994631289","Dorilfunun":"Ashurov Xasanbek \n +998944544411","Lashkarak":"Mirzakarimov Bexzod \n +998999720860","Samarchuq":"Qo'chqorov Sardor \n +998945187727","Ulug'bek":"Rais: Hayitqulova Ra'no +998944260725","Xakkarman":"Azimjonov Olimjon \n +998992615111","Bobotog'":"Muxitdinov Shoxruxbek \n +998331777723","Beruniy":"Rais: Zakirov Abduvohid +998993666715","Bog'i surh":"Arabova Mohira \n +998931673777","Chotqol":"Xayrullayev Durbek \n +998930050851","Do'stlik":"Rustamova Ruxsora \n +998943239503","Go'zal":"Rais: Dushayeva Xurshida +998770684004","G'afur G'ulom":"Rais: Zakirova Gulchexra +998942186775","Grum":"Qarshiboyev Sanjar","Gulbog'":"Abdumannobov Doston \n +998940146144","Gulzor":"Axmedov Islombek \n +998943141144","Istiqbol":"Rais: Nishanova Maxmuda +998901747478","Istiqlol":"Akromjonov Temurmalik \n +998944041016","Jigariston":"Rais: Babaraximova Mehriniso +998949321055","Karvon":"Boymatjonov Ahror \n +998945554045","Kimyogar":"Mingboyev Ma'ruf \n +998931690914","Ko'k terak":"Axmedov Sulton \n +998990017144","Maydon":"Rais: Mengliyev Ixtibor +998936075351","Mustaqillik":"Qurbonqulov Umidjon \n +998931873673","Namuna":"Abdumalikov Sardor \n +998932829657","Navbahor":"Saydraxmanov Doston \n +998990996116","Navro'z-1":"Rais: Kaykieva Xafiza +998994004333","Nurchi":"Ashurboyev Asilbek \n +998936662124","Obliq":"Nazmiddinxonov Zayniddinxon \n +998949323130","Obod":"Rais: Eshmuratov Xusnutdin +998931723680","Oppartak":"Siddikov Samandar \n +998949444740","Ozodlik":"Quvonov Ixtiyor \n +998943632334","Qorabog'":"Umirzakov Axror \n +998949265401","Sog'lom":"Matxoliqov Javlon +998931738419","Taraqqiyot":"Roxatillayev Sherzodbek \n +998936273815","YABS":"Axmedov Jahongir \n +998949253675","Yangi go'shtsoy":"Mamasodikov Doston \n +998997259299","Yangi hayot":"Jamolov Avazbek \n +998885449898","Yangiobod":"Barkinov Farrux \n +998991074167","Yoshlik":"Chorshanbiyev Qudrat \n +998936004294"};
+    const malumotData = {"Yoshlar daftari": "14-30 yoshgacha.", "Volontyorlik": "Ko'ngilli xizmat."};
+    const loyihalarData = {"Ibrat Farzandlari": "Tillar platformasi.", "Ustoz AI": "Kasblar platformasi."};
+    const yettilikData = {"Rais": "Mahalla nazorati."};
+
+    const menus = ['main-menu', 'mahallalar-menu', 'malumot-menu', 'loyihalar-menu', 'yettilik-menu', 'murojaat-menu'];
+
+    function initMenus() {
+        const mDiv = document.getElementById('mahallalar-menu');
+        const mSelect = document.getElementById('user-mahalla');
+        Object.keys(contactData).sort().forEach(key => {
+            let btn = document.createElement('button');
+            btn.innerText = key;
+            btn.onclick = () => showData(key, 'contact');
+            mDiv.appendChild(btn);
+            let opt = document.createElement('option');
+            opt.value = key; opt.innerText = key;
+            mSelect.appendChild(opt);
+        });
+        appendBackButton(mDiv, 'main');
+        appendBackButton(document.getElementById('loyihalar-menu'), 'malumot');
+        appendBackButton(document.getElementById('yettilik-menu'), 'malumot');
+    }
+
+    function appendBackButton(parent, target) {
+        let btn = document.createElement('button');
+        btn.innerText = "⬅️ Orqaga"; btn.className = "back-btn";
+        btn.onclick = () => showMenu(target);
+        parent.appendChild(btn);
+    }
+
+    function showMenu(menuId) {
+        menus.forEach(m => document.getElementById(m).classList.add('hidden'));
+        document.getElementById(menuId + '-menu').classList.remove('hidden');
+        document.getElementById('display-box').style.display = 'none';
+        window.scrollTo(0,0);
+    }
+
+    function showData(key, type) {
+        let text = (type === 'contact') ? contactData[key] : (type === 'loyihalar') ? loyihalarData[key] : (type === 'yettilik') ? yettilikData[key] : malumotData[key];
+        document.getElementById('title-display').innerText = key;
+        document.getElementById('text-display').innerText = text;
+        document.getElementById('display-box').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    document.getElementById('complaintForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const fileInput = document.getElementById('evidence');
+        const file = fileInput.files[0];
+        
+        btn.innerText = "Yuborilmoqda...";
+        btn.parentElement.classList.add('loading');
+
+        const caption = `📝 YANGI MUROJAAT\n\n👤 F.I.SH: ${document.getElementById('fullname').value}\n📞 Tel: ${document.getElementById('phone').value}\n📍 Mahalla: ${document.getElementById('user-mahalla').value}\n\n📄 Matn: ${document.getElementById('complaintText').value}`;
+
+        try {
+            if (file) {
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('caption', caption);
+                formData.append(file.type.startsWith('image') ? 'photo' : 'video', file);
+                
+                const method = file.type.startsWith('image') ? 'sendPhoto' : 'sendVideo';
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, { method: 'POST', body: formData });
+            } else {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: caption })
+                });
+            }
+            alert("Murojaat yuborildi!");
+            e.target.reset();
+            showMenu('main');
+        } catch (err) {
+            alert("Xatolik yuz berdi. Bot tokeni yoki Group ID xato bo'lishi mumkin.");
+        } finally {
+            btn.innerText = "Yuborish";
+            btn.parentElement.classList.remove('loading');
+        }
+    };
+
+    initMenus();
+</script>
+</body>
+</html>
