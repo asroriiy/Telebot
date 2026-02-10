@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mahalla Yoshlar Portali</title>
+    <link rel="icon" href="./logo.png">
     <style>
         :root {
             --primary: #2c3e50;
@@ -31,7 +32,21 @@
             padding: 1rem 0;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
+        header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            transition-duration: .5s;
+            object-fit: cover;
+        }
+        header img:hover { transform: scale(1.1); }
+        header img:active { transform: scale(0.9); }
+
         .container {
             width: 90%;
             max-width: 600px;
@@ -90,6 +105,7 @@
 <body>
 
 <header>
+    <img src="./logo.png" alt="Logo">
     <h1>Mahalla Yoshlar Portali</h1>
 </header>
 
@@ -119,21 +135,21 @@
         <h2 style="text-align:center">Murojaat yuborish</h2>
         <form id="complaintForm">
             <label>F.I.SH (To'liq ismingiz):</label>
-            <input type="text" id="fullname" required placeholder="Ism familiya">
+            <input type="text" name="fullname" id="fullname" required placeholder="Ism familiya">
             
             <label>Telefon raqamingiz:</label>
-            <input type="tel" id="phone" required placeholder="+998">
+            <input type="tel" name="phone" id="phone" required placeholder="+998">
             
             <label>Mahallangiz:</label>
-            <select id="user-mahalla" required>
+            <select name="mahalla" id="user-mahalla" required>
                 <option value="">Tanlang...</option>
             </select>
 
             <label>Foto yoki Video yuklang (Ixtiyoriy):</label>
-            <input type="file" id="evidence" accept="image/*,video/*">
+            <input type="file" name="evidence" id="evidence" accept="image/*,video/*">
 
             <label>Murojaat matni:</label>
-            <textarea id="complaintText" rows="5" required placeholder="Shikoyat matni..."></textarea>
+            <textarea name="text" id="complaintText" rows="5" required placeholder="Shikoyat matni..."></textarea>
 
             <button type="submit" id="submitBtn" style="background-color: var(--success);">Yuborish</button>
             <button type="button" class="back-btn" onclick="showMenu('main')">⬅️ Orqaga</button>
@@ -145,9 +161,6 @@
 </div>
 
 <script>
-    const BOT_TOKEN = "7196410668:AAGG2OFVRwCFoHuiozxgRQTKAgES-GjUWQk";
-    const CHAT_ID = "-1003532684860";
-
     const contactData = {"8-mart":"Mirmusayev Shaxzodbek \n +998940341000","Buston":"Abdurahatov Shoxrux \n +998994631289","Dorilfunun":"Ashurov Xasanbek \n +998944544411","Lashkarak":"Mirzakarimov Bexzod \n +998999720860","Samarchuq":"Qo'chqorov Sardor \n +998945187727","Ulug'bek":"Rais: Hayitqulova Ra'no +998944260725","Xakkarman":"Azimjonov Olimjon \n +998992615111","Bobotog'":"Muxitdinov Shoxruxbek \n +998331777723","Beruniy":"Rais: Zakirov Abduvohid +998993666715","Bog'i surh":"Arabova Mohira \n +998931673777","Chotqol":"Xayrullayev Durbek \n +998930050851","Do'stlik":"Rustamova Ruxsora \n +998943239503","Go'zal":"Rais: Dushayeva Xurshida +998770684004","G'afur G'ulom":"Rais: Zakirova Gulchexra +998942186775","Grum":"Qarshiboyev Sanjar","Gulbog'":"Abdumannobov Doston \n +998940146144","Gulzor":"Axmedov Islombek \n +998943141144","Istiqbol":"Rais: Nishanova Maxmuda +998901747478","Istiqlol":"Akromjonov Temurmalik \n +998944041016","Jigariston":"Rais: Babaraximova Mehriniso +998949321055","Karvon":"Boymatjonov Ahror \n +998945554045","Kimyogar":"Mingboyev Ma'ruf \n +998931690914","Ko'k terak":"Axmedov Sulton \n +998990017144","Maydon":"Rais: Mengliyev Ixtibor +998936075351","Mustaqillik":"Qurbonqulov Umidjon \n +998931873673","Namuna":"Abdumalikov Sardor \n +998932829657","Navbahor":"Saydraxmanov Doston \n +998990996116","Navro'z-1":"Rais: Kaykieva Xafiza +998994004333","Nurchi":"Ashurboyev Asilbek \n +998936662124","Obliq":"Nazmiddinxonov Zayniddinxon \n +998949323130","Obod":"Rais: Eshmuratov Xusnutdin +998931723680","Oppartak":"Siddikov Samandar \n +998949444740","Ozodlik":"Quvonov Ixtiyor \n +998943632334","Qorabog'":"Umirzakov Axror \n +998949265401","Sog'lom":"Matxoliqov Javlon +998931738419","Taraqqiyot":"Roxatillayev Sherzodbek \n +998936273815","YABS":"Axmedov Jahongir \n +998949253675","Yangi go'shtsoy":"Mamasodikov Doston \n +998997259299","Yangi hayot":"Jamolov Avazbek \n +998885449898","Yangiobod":"Barkinov Farrux \n +998991074167","Yoshlik":"Chorshanbiyev Qudrat \n +998936004294"};
     const malumotData = {"Yoshlar daftari": "14-30 yoshgacha.", "Volontyorlik": "Ko'ngilli xizmat."};
     const loyihalarData = {"Ibrat Farzandlari": "Tillar platformasi.", "Ustoz AI": "Kasblar platformasi."};
@@ -197,35 +210,26 @@
     document.getElementById('complaintForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
-        const fileInput = document.getElementById('evidence');
-        const file = fileInput.files[0];
+        const formData = new FormData(e.target);
         
         btn.innerText = "Yuborilmoqda...";
         btn.parentElement.classList.add('loading');
 
-        const caption = `📝 YANGI MUROJAAT\n\n👤 F.I.SH: ${document.getElementById('fullname').value}\n📞 Tel: ${document.getElementById('phone').value}\n📍 Mahalla: ${document.getElementById('user-mahalla').value}\n\n📄 Matn: ${document.getElementById('complaintText').value}`;
-
         try {
-            if (file) {
-                const formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('caption', caption);
-                formData.append(file.type.startsWith('image') ? 'photo' : 'video', file);
-                
-                const method = file.type.startsWith('image') ? 'sendPhoto' : 'sendVideo';
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, { method: 'POST', body: formData });
+            const response = await fetch('/api/murojaat', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert("Murojaat muvaffaqiyatli yuborildi!");
+                e.target.reset();
+                showMenu('main');
             } else {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: CHAT_ID, text: caption })
-                });
+                throw new Error();
             }
-            alert("Murojaat yuborildi!");
-            e.target.reset();
-            showMenu('main');
         } catch (err) {
-            alert("Xatolik yuz berdi. Bot tokeni yoki Group ID xato bo'lishi mumkin.");
+            alert("Xatolik yuz berdi. Iltimos keyinroq urunib ko'ring.");
         } finally {
             btn.innerText = "Yuborish";
             btn.parentElement.classList.remove('loading');
