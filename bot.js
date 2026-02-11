@@ -1,168 +1,164 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahalla Yoshlar Portali</title>
-    <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --bg: #f4f7f6; --white: #ffffff; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; }
-        header { background: var(--primary); color: white; width: 100%; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; cursor: pointer; }
-        .container { width: 90%; max-width: 500px; background: white; margin: 20px; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 12px; border: none; border-radius: 5px; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .hidden { display: none; }
-        .murojaat-btn { background: var(--success); grid-column: span 2; }
-    </style>
-</head>
-<body>
-<header>
-    <div onclick="showMenu('main')">Mahalla Portali</div>
-    <div id="header-user-name" onclick="handleProfileClick()">Kirish</div>
-</header>
-<div class="container">
-    <div id="main-menu" class="menu-grid">
-        <button onclick="alert('Mahallalar ro\'yxati yaqinda!')">Mahallalar</button>
-        <button onclick="alert('Portal haqida ma\'lumot')">Ma'lumot</button>
-        <button class="murojaat-btn" onclick="checkLimitAndShowMurojaat()">✍️ Murojaat yo'llash</button>
-    </div>
+require('dotenv').config();
+const express = require("express");
+const { Bot, Keyboard, InputFile, webhookCallback } = require("grammy");
+const fs = require("fs");
+const path = require("path");
+const multer = require("multer");
 
-    <div id="login-menu" class="hidden">
-        <input type="tel" id="login-phone" placeholder="Telefon (998...)">
-        <input type="password" id="login-pass" placeholder="Parol">
-        <button onclick="login()" style="width:100%">Kirish</button>
-        <p onclick="showMenu('register')" style="text-align:center; color:blue; cursor:pointer">Ro'yxatdan o'tish</p>
-    </div>
+const app = express();
+const upload = multer({ dest: "uploads/" });
+const PORT = process.env.PORT || 3000; 
 
-    <div id="register-menu" class="hidden">
-        <p style="font-size: 0.8rem; color: #666;">Kod botga yuborilishi uchun botga /start bosing.</p>
-        <input type="tel" id="reg-phone" placeholder="998901234567">
-        <button id="send-otp-btn" onclick="sendOTP()" style="width:100%">Kod yuborish</button>
-        <div id="otp-section" class="hidden">
-            <input type="number" id="reg-otp" placeholder="Kod">
-            <input type="text" id="reg-name" placeholder="F.I.SH">
-            <input type="password" id="reg-pass" placeholder="Yangi parol">
-            <button onclick="verifyAndRegister()" style="width:100%; background:var(--success)">Tasdiqlash</button>
-        </div>
-    </div>
+const ADMIN_PHONE = process.env.AdminTel;
+const ADMIN_PASS = process.env.AdminPass;
+const LOG_GROUP_ID = Number(process.env.LOG_GROUP_ID); 
+const bot = new Bot(process.env.BOT_TOKEN);
 
-    <div id="murojaat-menu" class="hidden">
-        <form id="complaintForm">
-            <select name="mahalla" id="user-mahalla" required>
-                <option value="">Mahallani tanlang</option>
-                <option value="Navro'z">Navro'z</option>
-                <option value="Istiqlol">Istiqlol</option>
-            </select>
-            <textarea name="text" placeholder="Murojaat matni..." rows="4" required></textarea>
-            <input type="file" name="evidence" accept="image/*,video/*">
-            <button type="submit" style="width:100%; background:var(--success)">Yuborish</button>
-        </form>
-    </div>
+app.use(express.json());
 
-    <div id="profile-panel" class="hidden">
-        <h3 id="panel-name"></h3>
-        <button onclick="logout()" style="width:100%; background:red">Chiqish</button>
-    </div>
-</div>
+const USERS_FILE = "./users_db.json";
+const COMPLAINTS_FILE = "./complaints_db.json";
+const OTP_CACHE = new Map();
 
-<script>
-    let currentUser = JSON.parse(localStorage.getItem('portalUser'));
-    const menus = ['main-menu','login-menu','register-menu','murojaat-menu','profile-panel'];
+const initFile = (p, i) => { if (!fs.existsSync(p)) fs.writeFileSync(p, JSON.stringify(i)); };
+initFile(USERS_FILE, []);
+initFile(COMPLAINTS_FILE, []);
 
-    function showMenu(id) {
-        menus.forEach(m => document.getElementById(m).classList.add('hidden'));
-        const target = id.includes('-') ? id : id + '-menu';
-        document.getElementById(target).classList.remove('hidden');
-    } 
+const getData = (f) => JSON.parse(fs.readFileSync(f, "utf8"));
+const setData = (f, d) => fs.writeFileSync(f, JSON.stringify(d, null, 2));
+const clean = (p) => p.replace(/\D/g, "");
 
-    function handleProfileClick() { 
-        if(currentUser) {
-            document.getElementById('panel-name').innerText = currentUser.fullname;
-            showMenu('profile-panel');
-        } else {
-            showMenu('login');
-        }
+const contactData = {
+    "8-mart": "Mirmusayev Shaxzodbek Abdurashid o'g'li \n +998940341000",
+    "Buston": "Abdurahatov Shoxrux Abdurashid o'g'li \n +998994631289",
+    "Dorilfunun": "Ashurov Xasanbek Sayfiddin o'g'li \n +998944544411",
+    "Lashkarak": "Mirzakarimov Bexzod Faxriddinovich \n +998999720860",
+    "Samarchuq": "Qo'chqorov Sardor Sherzod o'g'li \n +998945187727",
+    "Ulug'bek": "Rais: Hayitqulova Ra'no +998944260725 \n Hokim yordamchisi: +998935247474 \n Yoshlar yetakchisi: +998999081294",
+    "Xakkarman": "Azimjonov Olimjon Azimjon o'g'li \n +998992615111",
+    "Bobotog'": "Muxitdinov Shoxruxbek To'lqinovich \n +998331777723",
+    "Beruniy": "Rais: Zakirov Abduvohid +998993666715 \n Yoshlar yetakchisi: +998936285010",
+    "Bog'i surh": "Arabova Mohira Karimovna \n +998931673777",
+    "Chotqol": "Xayrullayev Durbek Ubaydulla o'g'li \n +998930050851",
+    "Do'stlik": "Rustamova Ruxsora Sobirjon qizi \n +998943239503",
+    "Go'zal": "Rais: Dushayeva Xurshida +998770684004 \n Yoshlar yetakchisi: +998991713676",
+    "G'afur G'ulom": "Rais: Zakirova Gulchexra +998942186775 \n Yoshlar yetakchisi: +998900938600",
+    "Grum": "Qarshiboyev Sanjar Abdug'ani o'g'li",
+    "Gulbog'": "Abdumannobov Doston Davrom o'g'li \n +998940146144",
+    "Gulzor": "Axmedov Islombek Baxodir o'g'li \n +998943141144",
+    "Istiqbol": "Rais: Nishanova Maxmuda +998901747478 \n Yoshlar yetakchisi: +998900084200",
+    "Istiqlol": "Akromjonov Temurmalik Akromjon o'g'li \n +998944041016",
+    "Jigariston": "Rais: Babaraximova Mehriniso +998949321055 \n Yoshlar yetakchisi: +998944246292",
+    "Karvon": "Boymatjonov Ahror Asqarjonovich \n +998945554045",
+    "Kimyogar": "Mingboyev Ma'ruf Tolib o'g'li \n +998931690914",
+    "Ko'k terak": "Axmedov Sulton Xasanboy O'gli \n +998990017144",
+    "Maydon": "Rais: Mengliyev Ixtibor +998936075351 \n Yoshlar yetakchisi: +998940383735",
+    "Mustaqillik": "Qurbonqulov Umidjon Shuhrat o'g'li \n +998931873673",
+    "Namuna": "Abdumalikov Sardor Murodjon o'g'li \n +998932829657",
+    "Navbahor": "Saydraxmanov Doston Saidibroximovich \n +998990996116",
+    "Navro'z-1": "Rais: Kaykieva Xafiza +998994004333 \n Yoshlar yetakchisi: +998958661501",
+    "Nurchi": "Ashurboyev Asilbek Bahodiro'g'li \n +998936662124",
+    "Obliq": "Nazmiddinxonov Zayniddinxon Baxodir o'g'li \n +998949323130",
+    "Obod": "Rais: Eshmuratov Xusnutdin +998931723680 \n Yoshlar yetakchisi: +998909719717",
+    "Oppartak": "Siddikov Samandar Xamroqulovich \n +998949444740",
+    "Ozodlik": "Quvonov Ixtiyor Ilxamitdinovich \n +998943632334",
+    "Qorabog'": "Umirzakov Axror Abdumannop o'g'li \n +998949265401",
+    "Sog'lom": "Matxoliqov Javlon Jumaboy o'g'li +998931738419",
+    "Taraqqiyot": "Roxatillayev Sherzodbek Farxod o'g'li \n +998936273815",
+    "YABS": "Axmedov Jahongir Mamasoli o'g'li \n +998949253675",
+    "Yangi go'shtsoy": "Mamasodikov Doston Dilshod o'g'li \n +998997259299",
+    "Yangi hayot": "Jamolov Avazbek Azimjon o'g'li \n +998885449898",
+    "Yangiobod": "Barkinov Farrux Xayrulla o'g'li \n +998991074167",
+    "Yoshlik": "Chorshanbiyev Qudrat Alisherovich \n +998936004294"
+};
+
+const loyihalarHaqida = {
+    "Ibrat Farzandlari": "Ibrat Farzandlari - xorijiy tillarni onlayn o'rganish platformasi.",
+    "Ustoz AI": "Ustoz AI - zamonaviy kasblarni o'rganish platformasi.",
+    "Mutolaa": "Mutolaa - onlayn kutubxonani o'z ichiga olgan kitobxonlik loyihasi.",
+    "Yashil makon": "Yashil makon - ekologiyani asrash uchun ishlab chiqilgan loyiha.",
+    "Iqtidor": "Iqtidor - iste'dodli yoshlarni aniqlash va qo'llash loyihasi.",
+    "Jasorat": "Jasorat - liderlik va vatanparvarlik loyihasi.",
+    "Qizlar akademiyasi": "Qizlar akademiyasi - STEM va kasb-hunar loyihasi.",
+    "Matbuot va media": "Matbuot va media - jurnalistika va media treninglari."
+};
+
+app.get("/api/data", (req, res) => {
+    res.json({ contactData, loyihalarHaqida });
+});
+
+app.post("/api/send-otp", async (req, res) => {
+    const { phone } = req.body;
+    const cleanPhone = clean(phone || "");
+    const otp = Math.floor(10000 + Math.random() * 90000);
+    OTP_CACHE.set(cleanPhone, { otp, expires: Date.now() + 300000 });
+    const users = getData(USERS_FILE);
+    const user = users.find(u => u.phone && clean(u.phone).includes(cleanPhone));
+    if (user && user.chatId) {
+        try {
+            await bot.api.sendMessage(user.chatId, `🔑 Tasdiqlash kodi: ${otp}`);
+            return res.json({ success: true });
+        } catch (e) { return res.status(500).json({ success: false, msg: "Botga yozishda xatolik" }); }
+    } else { return res.status(400).json({ success: false, msg: "Avval botga /start bosing!" }); }
+});
+
+app.post("/api/register", (req, res) => {
+    const { phone, otp, fullname, password } = req.body;
+    const cleanPhone = clean(phone);
+    const cached = OTP_CACHE.get(cleanPhone);
+    if (!cached || cached.otp != otp) return res.status(400).json({ msg: "Kod xato" });
+    let users = getData(USERS_FILE);
+    let uIdx = users.findIndex(u => clean(u.phone) === cleanPhone);
+    if (uIdx !== -1) { users[uIdx].fullname = fullname; users[uIdx].password = password; }
+    else { users.push({ phone: cleanPhone, fullname, password, joined: Date.now() }); }
+    setData(USERS_FILE, users);
+    res.json({ success: true, user: users.find(u => clean(u.phone) === cleanPhone) });
+});
+
+app.post("/api/login", (req, res) => {
+    const { phone, pass } = req.body;
+    const cleanPhone = clean(phone);
+    if (cleanPhone === clean(ADMIN_PHONE || "") && pass === ADMIN_PASS) {
+        return res.json({ success: true, user: { fullname: "Admin", phone: ADMIN_PHONE, isAdmin: true } });
     }
+    const users = getData(USERS_FILE);
+    const user = users.find(u => clean(u.phone) === cleanPhone && u.password === pass);
+    if (user) res.json({ success: true, user });
+    else res.status(401).json({ success: false });
+});
 
-    function checkLimitAndShowMurojaat() {
-        if(!currentUser) return showMenu('login');
-        showMenu('murojaat');
-    }
+app.post("/api/murojaat", upload.single("evidence"), async (req, res) => {
+    try {
+        const { fullname, phone, mahalla, text } = req.body;
+        const comps = getData(COMPLAINTS_FILE);
+        comps.push({ fullname, phone, mahalla, text, date: Date.now() });
+        setData(COMPLAINTS_FILE, comps);
+        const cap = `📝 WEB MUROJAAT\n👤: ${fullname}\n📞: ${phone}\n📍: ${mahalla}\n📄: ${text}`;
+        if (req.file) {
+            const input = new InputFile(req.file.path);
+            req.file.mimetype.startsWith("image") ? await bot.api.sendPhoto(LOG_GROUP_ID, input, { caption: cap }) : await bot.api.sendVideo(LOG_GROUP_ID, input, { caption: cap });
+            fs.unlinkSync(req.file.path);
+        } else await bot.api.sendMessage(LOG_GROUP_ID, cap);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ success: false }); }
+});
 
-    async function sendOTP() {
-        const phone = document.getElementById('reg-phone').value;
-        const res = await fetch('/api/send-otp', { 
-            method:'POST', 
-            headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({phone}) 
-        });
-        const data = await res.json();
-        if(res.ok) { 
-            document.getElementById('otp-section').classList.remove('hidden'); 
-            alert("Kod botingizga yuborildi!"); 
-        } else {
-            alert(data.msg || "Xatolik yuz berdi");
-        }
-    }
+bot.command("start", async (ctx) => {
+    await ctx.reply("Assalomu alaykum! Ro'yxatdan o'tish uchun telefon raqamingizni yuboring.", {
+        reply_markup: new Keyboard().requestContact("📞 Raqamni yuborish").resized()
+    });
+});
 
-    async function verifyAndRegister() {
-        const payload = { 
-            phone: document.getElementById('reg-phone').value, 
-            otp: document.getElementById('reg-otp').value, 
-            fullname: document.getElementById('reg-name').value, 
-            password: document.getElementById('reg-pass').value 
-        };
-        const res = await fetch('/api/register', { 
-            method:'POST', 
-            headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify(payload) 
-        });
-        if(res.ok) {
-            const data = await res.json();
-            localStorage.setItem('portalUser', JSON.stringify(data.user));
-            location.reload();
-        } else {
-            alert("Xato yoki kod noto'g'ri!");
-        }
-    }
+bot.on("message:contact", async (ctx) => {
+    const phone = clean(ctx.message.contact.phone_number);
+    let users = getData(USERS_FILE);
+    let user = users.find(u => clean(u.phone) === phone);
+    if (user) { user.chatId = ctx.from.id; } 
+    else { users.push({ phone, chatId: ctx.from.id }); }
+    setData(USERS_FILE, users);
+    await ctx.reply("Raqamingiz ulandi. Endi saytda ro'yxatdan o'tishingiz mumkin.");
+});
 
-    async function login() {
-        const phone = document.getElementById('login-phone').value;
-        const pass = document.getElementById('login-pass').value;
-        const res = await fetch('/api/login', { 
-            method:'POST', 
-            headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({phone, pass}) 
-        });
-        const data = await res.json();
-        if(data.success) { 
-            localStorage.setItem('portalUser', JSON.stringify(data.user)); 
-            location.reload(); 
-        } else {
-            alert("Telefon yoki parol xato!");
-        }
-    }
-
-    // Form submission logic
-    document.getElementById('complaintForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        formData.append('fullname', currentUser.fullname);
-        formData.append('phone', currentUser.phone);
-
-        const res = await fetch('/api/murojaat', { method: 'POST', body: formData });
-        if(res.ok) {
-            alert("Murojaat yuborildi!");
-            showMenu('main');
-            e.target.reset();
-        } else {
-            alert("Yuborishda xatolik");
-        }
-    };
-
-    function logout() { localStorage.removeItem('portalUser'); location.reload(); }
-    document.getElementById('header-user-name').innerText = currentUser ? currentUser.fullname : "Kirish";
-</script>
-</body>
-</html>
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+app.use("/webhook", webhookCallback(bot, "express"));
+app.listen(PORT, "0.0.0.0", () => console.log(`Server running on port ${PORT}`));
