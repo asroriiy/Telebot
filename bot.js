@@ -1,131 +1,168 @@
-require('dotenv').config();
-const express = require("express");
-const { Bot, Keyboard, InputFile, webhookCallback } = require("grammy");
-const fs = require("fs");
-const path = require("path");
-const multer = require("multer");
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahalla Yoshlar Portali</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --bg: #f4f7f6; --white: #ffffff; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; }
+        header { background: var(--primary); color: white; width: 100%; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; cursor: pointer; }
+        .container { width: 90%; max-width: 500px; background: white; margin: 20px; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 12px; border: none; border-radius: 5px; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .hidden { display: none; }
+        .murojaat-btn { background: var(--success); grid-column: span 2; }
+    </style>
+</head>
+<body>
+<header>
+    <div onclick="showMenu('main')">Mahalla Portali</div>
+    <div id="header-user-name" onclick="handleProfileClick()">Kirish</div>
+</header>
+<div class="container">
+    <div id="main-menu" class="menu-grid">
+        <button onclick="alert('Mahallalar ro\'yxati yaqinda!')">Mahallalar</button>
+        <button onclick="alert('Portal haqida ma\'lumot')">Ma'lumot</button>
+        <button class="murojaat-btn" onclick="checkLimitAndShowMurojaat()">✍️ Murojaat yo'llash</button>
+    </div>
 
-const app = express();
-const upload = multer({ dest: "uploads/" });
-const PORT = process.env.PORT || 3000; 
+    <div id="login-menu" class="hidden">
+        <input type="tel" id="login-phone" placeholder="Telefon (998...)">
+        <input type="password" id="login-pass" placeholder="Parol">
+        <button onclick="login()" style="width:100%">Kirish</button>
+        <p onclick="showMenu('register')" style="text-align:center; color:blue; cursor:pointer">Ro'yxatdan o'tish</p>
+    </div>
 
-const ADMIN_PHONE = process.env.AdminTel;
-const ADMIN_PASS = process.env.AdminPass;
-const LOG_GROUP_ID = Number(process.env.LOG_GROUP_ID); 
+    <div id="register-menu" class="hidden">
+        <p style="font-size: 0.8rem; color: #666;">Kod botga yuborilishi uchun botga /start bosing.</p>
+        <input type="tel" id="reg-phone" placeholder="998901234567">
+        <button id="send-otp-btn" onclick="sendOTP()" style="width:100%">Kod yuborish</button>
+        <div id="otp-section" class="hidden">
+            <input type="number" id="reg-otp" placeholder="Kod">
+            <input type="text" id="reg-name" placeholder="F.I.SH">
+            <input type="password" id="reg-pass" placeholder="Yangi parol">
+            <button onclick="verifyAndRegister()" style="width:100%; background:var(--success)">Tasdiqlash</button>
+        </div>
+    </div>
 
-const bot = new Bot(process.env.BOT_TOKEN);
+    <div id="murojaat-menu" class="hidden">
+        <form id="complaintForm">
+            <select name="mahalla" id="user-mahalla" required>
+                <option value="">Mahallani tanlang</option>
+                <option value="Navro'z">Navro'z</option>
+                <option value="Istiqlol">Istiqlol</option>
+            </select>
+            <textarea name="text" placeholder="Murojaat matni..." rows="4" required></textarea>
+            <input type="file" name="evidence" accept="image/*,video/*">
+            <button type="submit" style="width:100%; background:var(--success)">Yuborish</button>
+        </form>
+    </div>
 
-app.use(express.json());
+    <div id="profile-panel" class="hidden">
+        <h3 id="panel-name"></h3>
+        <button onclick="logout()" style="width:100%; background:red">Chiqish</button>
+    </div>
+</div>
 
-const USERS_FILE = "./users_db.json";
-const COMPLAINTS_FILE = "./complaints_db.json";
-const OTP_CACHE = new Map();
+<script>
+    let currentUser = JSON.parse(localStorage.getItem('portalUser'));
+    const menus = ['main-menu','login-menu','register-menu','murojaat-menu','profile-panel'];
 
-const initFile = (p, i) => { if (!fs.existsSync(p)) fs.writeFileSync(p, JSON.stringify(i)); };
-initFile(USERS_FILE, []);
-initFile(COMPLAINTS_FILE, []);
+    function showMenu(id) {
+        menus.forEach(m => document.getElementById(m).classList.add('hidden'));
+        const target = id.includes('-') ? id : id + '-menu';
+        document.getElementById(target).classList.remove('hidden');
+    } 
 
-const getData = (f) => JSON.parse(fs.readFileSync(f, "utf8"));
-const setData = (f, d) => fs.writeFileSync(f, JSON.stringify(d, null, 2));
-
-app.post("/api/send-otp", async (req, res) => {
-    const { phone } = req.body;
-    const cleanPhone = phone.replace(/\D/g, "");
-    const otp = Math.floor(10000 + Math.random() * 90000);
-    OTP_CACHE.set(phone, { otp, expires: Date.now() + 300000 });
-    
-    const users = getData(USERS_FILE);
-    // Find user by phone to get their chatId
-    const user = users.find(u => u.phone && u.phone.replace(/\D/g, "").includes(cleanPhone));
-
-    if (user && user.chatId) {
-        try {
-            await bot.api.sendMessage(user.chatId, `🔑 Tasdiqlash kodi: ${otp}`);
-            return res.json({ success: true });
-        } catch (e) {
-            return res.status(500).json({ success: false, msg: "Botga yozishda xatolik" });
+    function handleProfileClick() { 
+        if(currentUser) {
+            document.getElementById('panel-name').innerText = currentUser.fullname;
+            showMenu('profile-panel');
+        } else {
+            showMenu('login');
         }
-    } else {
-        // If user hasn't started the bot, we can't send the code
-        return res.status(400).json({ success: false, msg: "Avval botga /start bosing!" });
     }
-});
 
-app.post("/api/register", (req, res) => {
-    const { phone, otp, fullname, password } = req.body;
-    const cached = OTP_CACHE.get(phone);
-    if (!cached || cached.otp != otp) return res.status(400).json({ msg: "Kod xato" });
-    
-    let users = getData(USERS_FILE);
-    let uIdx = users.findIndex(u => u.phone === phone);
-    
-    if (uIdx !== -1) {
-        users[uIdx].fullname = fullname;
-        users[uIdx].password = password;
-    } else {
-        users.push({ phone, fullname, password, joined: Date.now() });
+    function checkLimitAndShowMurojaat() {
+        if(!currentUser) return showMenu('login');
+        showMenu('murojaat');
     }
-    
-    setData(USERS_FILE, users);
-    res.json({ success: true, user: users.find(u => u.phone === phone) });
-});
 
-app.post("/api/login", (req, res) => {
-    const { phone, pass } = req.body;
-    if (phone === ADMIN_PHONE && pass === ADMIN_PASS) {
-        return res.json({ success: true, user: { fullname: "Admin", phone: ADMIN_PHONE, isAdmin: true } });
+    async function sendOTP() {
+        const phone = document.getElementById('reg-phone').value;
+        const res = await fetch('/api/send-otp', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({phone}) 
+        });
+        const data = await res.json();
+        if(res.ok) { 
+            document.getElementById('otp-section').classList.remove('hidden'); 
+            alert("Kod botingizga yuborildi!"); 
+        } else {
+            alert(data.msg || "Xatolik yuz berdi");
+        }
     }
-    const users = getData(USERS_FILE);
-    const user = users.find(u => u.phone === phone && u.password === pass);
-    if (user) res.json({ success: true, user });
-    else res.status(401).json({ success: false });
-});
 
-app.post("/api/murojaat", upload.single("evidence"), async (req, res) => {
-    try {
-        const { fullname, phone, mahalla, text } = req.body;
-        const comps = getData(COMPLAINTS_FILE);
-        comps.push({ fullname, phone, mahalla, text, date: Date.now() });
-        setData(COMPLAINTS_FILE, comps);
-        const cap = `📝 WEB MUROJAAT\n👤: ${fullname}\n📞: ${phone}\n📍: ${mahalla}\n📄: ${text}`;
-        if (req.file) {
-            const input = new InputFile(req.file.path);
-            req.file.mimetype.startsWith("image") ? await bot.api.sendPhoto(LOG_GROUP_ID, input, { caption: cap }) : await bot.api.sendVideo(LOG_GROUP_ID, input, { caption: cap });
-            fs.unlinkSync(req.file.path);
-        } else await bot.api.sendMessage(LOG_GROUP_ID, cap);
-        res.json({ success: true });
-    } catch (e) { res.status(500).json({ success: false }); }
-});
-
-const userKB = new Keyboard().text("Mahallalar").text("Ma'lumot").row().text("👤 Profil").resized();
-
-bot.command("start", async (ctx) => {
-    await ctx.reply("Assalomu alaykum! Ro'yxatdan o'tish uchun telefon raqamingizni yuboring.", {
-        reply_markup: new Keyboard().requestContact("📞 Raqamni yuborish").resized()
-    });
-});
-
-bot.on("message:contact", async (ctx) => {
-    const phone = "+" + ctx.message.contact.phone_number.replace(/\+/g, "");
-    let users = getData(USERS_FILE);
-    let user = users.find(u => u.phone === phone);
-    if (user) {
-        user.chatId = ctx.from.id;
-    } else {
-        users.push({ phone, chatId: ctx.from.id });
+    async function verifyAndRegister() {
+        const payload = { 
+            phone: document.getElementById('reg-phone').value, 
+            otp: document.getElementById('reg-otp').value, 
+            fullname: document.getElementById('reg-name').value, 
+            password: document.getElementById('reg-pass').value 
+        };
+        const res = await fetch('/api/register', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify(payload) 
+        });
+        if(res.ok) {
+            const data = await res.json();
+            localStorage.setItem('portalUser', JSON.stringify(data.user));
+            location.reload();
+        } else {
+            alert("Xato yoki kod noto'g'ri!");
+        }
     }
-    setData(USERS_FILE, users);
-    await ctx.reply("Raqamingiz ulandi. Endi saytda kod olishingiz mumkin.", { reply_markup: userKB });
-});
 
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
-app.get("/logo.png", (req, res) => res.sendFile(path.join(__dirname, "logo.png")));
-app.use("/webhook", webhookCallback(bot, "express"));
-
-app.listen(PORT, "0.0.0.0", async () => {
-    const hostname = process.env.RENDER_EXTERNAL_HOSTNAME;
-    if (hostname) {
-        await bot.api.setWebhook(`https://${hostname}/webhook`, { drop_pending_updates: true });
-        console.log("✅ Bot live on: " + hostname);
+    async function login() {
+        const phone = document.getElementById('login-phone').value;
+        const pass = document.getElementById('login-pass').value;
+        const res = await fetch('/api/login', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({phone, pass}) 
+        });
+        const data = await res.json();
+        if(data.success) { 
+            localStorage.setItem('portalUser', JSON.stringify(data.user)); 
+            location.reload(); 
+        } else {
+            alert("Telefon yoki parol xato!");
+        }
     }
-});
+
+    // Form submission logic
+    document.getElementById('complaintForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        formData.append('fullname', currentUser.fullname);
+        formData.append('phone', currentUser.phone);
+
+        const res = await fetch('/api/murojaat', { method: 'POST', body: formData });
+        if(res.ok) {
+            alert("Murojaat yuborildi!");
+            showMenu('main');
+            e.target.reset();
+        } else {
+            alert("Yuborishda xatolik");
+        }
+    };
+
+    function logout() { localStorage.removeItem('portalUser'); location.reload(); }
+    document.getElementById('header-user-name').innerText = currentUser ? currentUser.fullname : "Kirish";
+</script>
+</body>
+</html>
