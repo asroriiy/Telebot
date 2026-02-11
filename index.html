@@ -67,14 +67,26 @@
     function showMenu(id) {
         menus.forEach(m => document.getElementById(m).classList.add('hidden'));
         document.getElementById(id + (id.includes('-') ? '' : '-menu')).classList.remove('hidden');
-    }
+    } 
+
     function handleProfileClick() { currentUser ? showProfile() : showMenu('login'); }
     async function sendOTP() {
         const phone = document.getElementById('reg-phone').value;
-        const res = await fetch('/api/send-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone}) });
-        if(res.ok) { document.getElementById('otp-section').classList.remove('hidden'); alert("Kod botingizga yuborildi!"); }
-    }
-    async function verifyAndRegister() {
+        const res = await fetch('/api/send-otp', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({phone}) 
+        });
+        
+        const data = await res.json();
+        
+        if(res.ok) { 
+            document.getElementById('otp-section').classList.remove('hidden'); 
+            alert("Kod botingizga yuborildi!"); 
+        } else {
+            alert(data.msg || "Xatolik yuz berdi");
+        }
+    }n verifyAndRegister() {
         const payload = { phone:document.getElementById('reg-phone').value, otp:document.getElementById('reg-otp').value, fullname:document.getElementById('reg-name').value, password:document.getElementById('reg-pass').value };
         const res = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         if(res.ok) location.reload(); else alert("Xato!");
@@ -90,4 +102,5 @@
 </script>
 </body>
 </html>
+
 
