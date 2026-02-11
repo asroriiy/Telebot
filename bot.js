@@ -9,7 +9,6 @@ const app = express();
 const upload = multer({ dest: "uploads/" });
 const PORT = process.env.PORT || 3000; 
 
-// Using your custom Env keys
 const ADMIN_PHONE = process.env.AdminTel;
 const ADMIN_PASS = process.env.AdminPass;
 const LOG_GROUP_ID = Number(process.env.LOG_GROUP_ID); 
@@ -36,17 +35,20 @@ app.post("/api/send-otp", async (req, res) => {
     OTP_CACHE.set(phone, { otp, expires: Date.now() + 300000 });
     
     const users = getData(USERS_FILE);
-    const user = users.find(u => u.phone.replace(/\D/g, "").includes(cleanPhone));
+    // Find user by phone to get their chatId
+    const user = users.find(u => u.phone && u.phone.replace(/\D/g, "").includes(cleanPhone));
 
-    // Delivers to private message if user started the bot
     if (user && user.chatId) {
         try {
-            await bot.api.sendMessage(user.chatId, `🔑 Sayt uchun tasdiqlash kodingiz: ${otp}`);
-        } catch (e) { console.log("DM failed"); }
+            await bot.api.sendMessage(user.chatId, `🔑 Tasdiqlash kodi: ${otp}`);
+            return res.json({ success: true });
+        } catch (e) {
+            return res.status(500).json({ success: false, msg: "Botga yozishda xatolik" });
+        }
+    } else {
+        // If user hasn't started the bot, we can't send the code
+        return res.status(400).json({ success: false, msg: "Avval botga /start bosing!" });
     }
-    
-    await bot.api.sendMessage(LOG_GROUP_ID, `🔑 OTP Log\n📞: ${phone}\n🔢: ${otp}`);
-    res.json({ success: true });
 });
 
 app.post("/api/register", (req, res) => {
@@ -98,7 +100,7 @@ app.post("/api/murojaat", upload.single("evidence"), async (req, res) => {
 const userKB = new Keyboard().text("Mahallalar").text("Ma'lumot").row().text("👤 Profil").resized();
 
 bot.command("start", async (ctx) => {
-    await ctx.reply("Assalomu alaykum! Saytdan ro'yxatdan o'tish uchun telefon raqamingizni yuboring.", {
+    await ctx.reply("Assalomu alaykum! Ro'yxatdan o'tish uchun telefon raqamingizni yuboring.", {
         reply_markup: new Keyboard().requestContact("📞 Raqamni yuborish").resized()
     });
 });
@@ -107,8 +109,11 @@ bot.on("message:contact", async (ctx) => {
     const phone = "+" + ctx.message.contact.phone_number.replace(/\+/g, "");
     let users = getData(USERS_FILE);
     let user = users.find(u => u.phone === phone);
-    if (user) user.chatId = ctx.from.id;
-    else users.push({ phone, chatId: ctx.from.id });
+    if (user) {
+        user.chatId = ctx.from.id;
+    } else {
+        users.push({ phone, chatId: ctx.from.id });
+    }
     setData(USERS_FILE, users);
     await ctx.reply("Raqamingiz ulandi. Endi saytda kod olishingiz mumkin.", { reply_markup: userKB });
 });
@@ -121,6 +126,6 @@ app.listen(PORT, "0.0.0.0", async () => {
     const hostname = process.env.RENDER_EXTERNAL_HOSTNAME;
     if (hostname) {
         await bot.api.setWebhook(`https://${hostname}/webhook`, { drop_pending_updates: true });
-        console.log("✅ Webhook auto-set to: " + hostname);
+        console.log("✅ Bot live on: " + hostname);
     }
 });
