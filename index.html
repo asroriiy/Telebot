@@ -50,7 +50,6 @@
     </div>
 
     <div id="register-menu" class="hidden">
-        <p style="font-size: 0.8rem; color: #666;">Kod botga yuborilishi uchun botga /start bosing.</p>
         <input type="tel" id="reg-phone" placeholder="998901234567">
         <button onclick="sendOTP()" style="width:100%">Kod yuborish</button>
         <div id="otp-section" class="hidden">
@@ -64,15 +63,16 @@
     <div id="murojaat-menu" class="hidden">
         <form id="complaintForm">
             <select name="mahalla" id="user-mahalla" required><option value="">Mahallani tanlang</option></select>
-            <textarea name="text" placeholder="Murojaat matni..." rows="4" required></textarea>
-            <input type="file" name="evidence" accept="image/*,video/*">
+            <textarea name="text" id="comp-text" placeholder="Murojaat matni..." rows="4" required></textarea>
             <button type="submit" style="width:100%; background:var(--success)">Yuborish</button>
         </form>
+        <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
     </div>
 
     <div id="profile-panel" class="hidden">
         <h3 id="panel-name"></h3>
         <button onclick="logout()" style="width:100%; background:red">Chiqish</button>
+        <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
     </div>
 </div>
 
@@ -89,27 +89,26 @@
     async function loadData() {
         const res = await fetch('/api/data');
         const data = await res.json();
-        
-        // Populate Mahallalar
         const mList = document.getElementById('mahallalar-list');
         const mSelect = document.getElementById('user-mahalla');
+        
+        mList.innerHTML = '';
         Object.keys(data.contactData).sort().forEach(name => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<strong>${name}</strong><br>${data.contactData[name]}`;
             mList.appendChild(card);
-
             const opt = document.createElement('option');
             opt.value = name; opt.innerText = name;
             mSelect.appendChild(opt);
         });
 
-        // Populate Loyihalar
         const lList = document.getElementById('loyihalar-list');
+        lList.innerHTML = '';
         Object.entries(data.loyihalarHaqida).forEach(([title, info]) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<strong>${title}</strong><br>${info}`;
+            card.innerHTML = `<strong>${title}</strong><br>${info.info}`;
             lList.appendChild(card);
         });
     }
@@ -119,38 +118,41 @@
 
     async function sendOTP() {
         const phone = document.getElementById('reg-phone').value;
-        const res = await fetch('/api/send-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone}) });
-        const data = await res.json();
-        if(res.ok) { document.getElementById('otp-section').classList.remove('hidden'); alert("Kod botga yuborildi!"); }
-        else alert(data.msg);
+        await fetch('/api/send-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone}) });
+        document.getElementById('otp-section').classList.remove('hidden');
     }
 
     async function verifyAndRegister() {
-        const payload = { phone:document.getElementById('reg-phone').value, otp:document.getElementById('reg-otp').value, fullname:document.getElementById('reg-name').value, password:document.getElementById('reg-pass').value };
-        const res = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-        if(res.ok) { const data = await res.json(); localStorage.setItem('portalUser', JSON.stringify(data.user)); location.reload(); }
-        else alert("Xato!");
+        const fullname = document.getElementById('reg-name').value;
+        const phone = document.getElementById('reg-phone').value;
+        const res = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone, fullname}) });
+        const data = await res.json();
+        localStorage.setItem('portalUser', JSON.stringify(data.user));
+        location.reload();
     }
 
     async function login() {
-        const phone = document.getElementById('login-phone').value, pass = document.getElementById('login-pass').value;
-        const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone, pass}) });
-        if(res.ok) { const data = await res.json(); localStorage.setItem('portalUser', JSON.stringify(data.user)); location.reload(); }
-        else alert("Xato!");
+        const phone = document.getElementById('login-phone').value;
+        const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone}) });
+        const data = await res.json();
+        localStorage.setItem('portalUser', JSON.stringify(data.user));
+        location.reload();
     }
 
     document.getElementById('complaintForm').onsubmit = async (e) => {
         e.preventDefault();
-        const fd = new FormData(e.target);
-        fd.append('fullname', currentUser.fullname);
-        fd.append('phone', currentUser.phone);
-        const res = await fetch('/api/murojaat', { method:'POST', body:fd });
-        if(res.ok) { alert("Murojaat yuborildi!"); showMenu('main'); e.target.reset(); }
+        const payload = {
+            fullname: currentUser.fullname,
+            phone: currentUser.phone,
+            mahalla: document.getElementById('user-mahalla').value,
+            text: document.getElementById('comp-text').value
+        };
+        const res = await fetch('/api/murojaat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        if(res.ok) { alert("Yuborildi!"); showMenu('main'); }
     };
 
     function logout() { localStorage.removeItem('portalUser'); location.reload(); }
     if(currentUser) document.getElementById('header-user-name').innerText = currentUser.fullname;
-    
     loadData();
 </script>
 </body>
