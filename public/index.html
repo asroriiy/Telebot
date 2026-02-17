@@ -150,16 +150,35 @@
     }
 
     document.getElementById('complaintForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const payload = {
-            fullname: currentUser.fullname,
-            phone: currentUser.phone,
-            mahalla: document.getElementById('user-mahalla').value,
-            text: document.getElementById('comp-text').value
-        };
-        const res = await fetch('/api/murojaat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-        if(res.ok) { alert("Yuborildi!"); showMenu('main'); }
-    };
+    e.preventDefault();
+    
+    // FormData obyektini yaratamiz
+    const formData = new FormData();
+    formData.append('fullname', currentUser.fullname);
+    formData.append('phone', currentUser.phone);
+    formData.append('mahalla', document.getElementById('user-mahalla').value);
+    formData.append('text', document.getElementById('comp-text').value);
+    
+    // Faylni biriktiramiz
+    const fileInput = document.getElementById('comp-file');
+    if (fileInput.files[0]) {
+        formData.append('file', fileInput.files[0]);
+    }
+
+    // MUHIM: Headers qismidan 'Content-Type'ni olib tashlaymiz (brauzer o'zi FormData uchun to'g'rilaydi)
+    const res = await fetch('/api/murojaat', { 
+        method: 'POST', 
+        body: formData 
+    });
+
+    if(res.ok) { 
+        alert("Murojaatingiz qabul qilindi!"); 
+        showMenu('main'); 
+        e.target.reset(); // Formani tozalash
+    } else {
+        alert("Xatolik yuz berdi!");
+    }
+};
 
     function logout() { localStorage.removeItem('portalUser'); location.reload(); }
     if(currentUser) document.getElementById('header-user-name').innerText = currentUser.fullname;
