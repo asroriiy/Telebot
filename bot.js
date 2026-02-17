@@ -2,13 +2,16 @@ require('dotenv').config();
 const express = require("express");
 const { Bot, Keyboard, InputFile, webhookCallback } = require("grammy");
 const fs = require("fs");
-const path = require("path");
+const path = require("path"); // Faqat bir marta bo'lishi kerak
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.json());
 
+// 1. Static fayllarni ulash (index.html uchun)
+app.use(express.static(path.join(__dirname, 'public')));
+
+const PORT = process.env.PORT || 3000;
 const MAIN_ADMIN = Number(process.env.MAIN_ADMIN);
-const LOG_GROUP_ID = Number(process.env.LOG_GROUP_ID);
 const ADMINS = [MAIN_ADMIN, Number(process.env.PROMO_ADMIN), Number(process.env.ADMIN)];
 
 const bot = new Bot(process.env.BOT_TOKEN);
@@ -20,7 +23,6 @@ if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, JSON.stringify([]))
 if (!fs.existsSync(CHATS_FILE)) fs.writeFileSync(CHATS_FILE, JSON.stringify([]));
 
 let userDatabase = new Set(JSON.parse(fs.readFileSync(USERS_FILE, "utf8")).map(Number));
-let chatDatabase = new Set(JSON.parse(fs.readFileSync(CHATS_FILE, "utf8")).map(Number));
 
 const contactData = {
     "8-mart": "Mirmusayev Shaxzodbek Abdurashid o'g'li \n +998940341000",
@@ -77,15 +79,12 @@ const loyihalarHaqida = {
     "Matbuot va media": { info: "Matbuot va media - jurnalistika va media treninglari." }
 };
 
-app.use(express.json());
-app.use(express.static('public'));
-
+// API Endpointlar
 app.get('/api/data', (req, res) => {
     res.json({ contactData, loyihalarHaqida });
 });
 
 app.post('/api/send-otp', (req, res) => {
-    const { phone } = req.body;
     res.json({ success: true });
 });
 
@@ -102,18 +101,25 @@ app.post('/api/login', (req, res) => {
 app.post('/api/murojaat', (req, res) => {
     const { fullname, phone, text, mahalla } = req.body;
     const log = `📝 <b>Yangi Murojaat!</b>\n\n👤: ${fullname}\n📞: ${phone}\n📍: ${mahalla}\n💬: ${text}`;
-    bot.api.sendMessage(MAIN_ADMIN, log, { parse_mode: "HTML" }).catch(e => console.log(e));
+    bot.api.sendMessage(MAIN_ADMIN, log, { parse_mode: "HTML" }).catch(e => console.error(e));
     res.json({ ok: true });
 });
 
+// Bot webhook
 app.use("/webhook", webhookCallback(bot, "express"));
+
+// Asosiy sahifa (Brauzerda / ochilganda)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 bot.command("start", (ctx) => {
     userDatabase.add(ctx.from.id);
     fs.writeFileSync(USERS_FILE, JSON.stringify(Array.from(userDatabase)));
-    ctx.reply("Xush kelibsiz!");
+    ctx.reply("Xush kelibsiz! Mahalla yoshlar portalining botiga ulandingiz.");
 });
 
-app.listen(PORT, () => {
-    console.log(`Server: ${PORT}`);
+// Serverni yurgizish (Render uchun 0.0.0.0 muhim)
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Server ishga tushdi: Port ${PORT}`);
 });
