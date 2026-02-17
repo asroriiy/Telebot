@@ -3,7 +3,8 @@ const express = require("express");
 const { Bot, Keyboard, InputFile, webhookCallback } = require("grammy");
 const fs = require("fs");
 const path = require("path"); // Faqat bir marta bo'lishi kerak
-
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const app = express();
 app.use(express.json());
 
@@ -98,12 +99,44 @@ app.post('/api/login', (req, res) => {
     res.json({ user: { phone, fullname: "Foydalanuvchi" } });
 });
 
-app.post('/api/murojaat', (req, res) => {
-    const { fullname, phone, text, mahalla } = req.body;
-    const log = `📝 <b>Yangi Murojaat!</b>\n\n👤: ${fullname}\n📞: ${phone}\n📍: ${mahalla}\n💬: ${text}`;
-    bot.api.sendMessage(MAIN_ADMIN, log, { parse_mode: "HTML" }).catch(e => console.error(e));
-    res.json({ ok: true });
-});
+app.post('/api/murojaat', upload.single('file'), async (req, res) => {
+    try {
+        const { fullname, phone, text, mahalla } = req.body;
+        const file = req.file; 
+
+        const log = `📝 <b>Yangi Murojaat!</b>\n\n` +
+                    `👤: ${fullname}\n` +
+                    `📞: ${phone}\n` +
+                    `📍: ${mahalla}\n` +
+                    `💬: ${text}`;
+
+        if (file) {
+            const filePath = file.path; 
+            const inputFile = new InputFile(filePath);
+
+            if (file.mimetype.startsWith('image/')) {
+                await bot.api.sendPhoto(MAIN_ADMIN, inputFile, { caption: log, parse_mode: "HTML" });
+            } else if (file.mimetype.startsWith('video/')) {
+                await bot.api.sendVideo(MAIN_ADMIN, inputFile, { caption: log, parse_mode: "HTML" });
+            } else {
+                await bot.api.sendDocument(MAIN_ADMIN, inputFile, { caption: log, parse_mode: "HTML" });
+            }
+
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        } else {
+            // MANA BU QISM QOLIB KETGAN EDI:
+            // Fayl yo'q bo'lsa faqat matnni yuborish
+            await bot.api.sendMessage(MAIN_ADMIN, log, { parse_mode: "HTML" });
+        }
+
+        res.json({ ok: true });
+    } catch (error) {
+        console.error("Murojaat yuborishda xatolik:", error);
+        res.status(500).json({ ok: false });
+    }
+}); // Qavs to'g'ri yopildi
 
 // Bot webhook
 app.use("/webhook", webhookCallback(bot, "express"));
@@ -123,3 +156,4 @@ bot.command("start", (ctx) => {
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`✅ Server ishga tushdi: Port ${PORT}`);
 });
+
