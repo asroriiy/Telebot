@@ -15,11 +15,13 @@
         .hidden { display: none; }
         .murojaat-btn { background: var(--success); grid-column: span 2; margin-top: 10px; }
         .card { background: #f9f9f9; border-left: 4px solid var(--accent); padding: 10px; margin-bottom: 10px; font-size: 0.9rem; white-space: pre-wrap; }
+        header div { display: flex; gap: 10px; align-items: center;}
+        header img { height: 40px; width: auto; border-radius: 5px;}
     </style>
 </head>
 <body>
 <header>
-    <div onclick="showMenu('main')"><img alt="" src="./logo.png"> Mahalla Portali</div>
+    <div onclick="showMenu('main')"> <img src="./logo.png" alt=""> Mahalla Portali</div>
     <div id="header-user-name" onclick="handleProfileClick()">Kirish</div>
 </header>
 
@@ -61,12 +63,20 @@
     </div>
 
     <div id="murojaat-menu" class="hidden">
-        <form id="complaintForm">
-            <select name="mahalla" id="user-mahalla" required><option value="">Mahallani tanlang</option></select>
-            <textarea name="text" id="comp-text" placeholder="Murojaat matni..." rows="4" required></textarea>
-            <button type="submit" style="width:100%; background:var(--success)">Yuborish</button>
-        </form>
-        <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
+    <h3>✍️ Yangi murojaat</h3>
+    <form id="complaintForm">
+        <select id="user-mahalla" required>
+            <option value="">Mahallani tanlang</option>
+        </select>
+        
+        <textarea id="comp-text" placeholder="Muammo haqida batafsil yozing..." rows="4" required></textarea>
+        
+        <label>Rasm yoki Video biriktirish (ixtiyoriy):</label>
+        <input type="file" id="comp-file" accept="image/*,video/*">
+        
+        <button type="submit" style="width:100%; background:var(--success); margin-top:10px;">Yuborish</button>
+    </form>
+    <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
     </div>
 
     <div id="profile-panel" class="hidden">
