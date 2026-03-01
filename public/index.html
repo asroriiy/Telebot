@@ -3,114 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Angren rasmiy</title>
+    <title>Angren Portali</title>
     <link rel="shortcut icon" href="./logo.png" type="image/x-icon">
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --bg: #f4f7f6; --white: #ffffff; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; }
-        header { background: var(--primary); color: white; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; cursor: pointer; position: sticky; top: 0; z-index: 100; width: 100%; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; }
+        header { background: var(--primary); color: white; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; cursor: pointer; position: sticky; top: 0; z-index: 100; }
         .container { width: 95%; max-width: 600px; background: white; margin: 20px; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 12px; border: none; border-radius: 5px; background: var(--accent); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button { padding: 12px; border: none; border-radius: 5px; background: var(--accent); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
         button:active { transform: scale(0.98); }
         input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
         .hidden { display: none; }
         .murojaat-btn { background: var(--success); grid-column: span 2; margin-top: 10px; }
-        .card { background: #f9f9f9; border-left: 4px solid var(--accent); padding: 10px; margin-bottom: 10px; font-size: 0.9rem; white-space: pre-wrap; border-radius: 0 5px 5px 0; }
+        .list-container { max-height: 450px; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
+        .card { background: #f9f9f9; border-left: 4px solid var(--accent); padding: 12px; margin-bottom: 10px; font-size: 0.9rem; border-radius: 0 5px 5px 0; line-height: 1.5; }
+        .card strong { color: var(--primary); font-size: 1rem; }
         header div { display: flex; gap: 10px; align-items: center;}
-        header img { height: 40px; width: auto; border-radius: 5px;}
+        header img { height: 35px; width: auto; border-radius: 5px;}
     </style>
 </head>
 <body>
+
 <header>
-    <div onclick="showMenu('main')"> <img src="./logo.png" alt="Logo"> Mahalla Portali</div>
+    <div onclick="showMenu('main')"> <img src="./logo.png" alt="Logo"> Angren Portali</div>
     <div id="header-user-name" onclick="handleProfileClick()">Kirish</div>
 </header>
+
 <div class="container">
     <div id="main-menu" class="menu-grid">
         <button onclick="showMenu('mahallalar')">📍 Mahallalar</button>
         <button onclick="showMenu('loyihalar')">🚀 Loyihalar</button>
         <button class="murojaat-btn" onclick="checkAuthAndShow('murojaat')">✍️ Murojaat yo'llash</button>
     </div>
+
     <div id="mahallalar-menu" class="hidden">
         <h3>📍 Mahallalar va Mas'ullar</h3>
-        <div id="mahallalar-list"></div>
-        <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
+        <div id="mahallalar-list" class="list-container"></div>
+        <button onclick="showMenu('main')" style="width:100%; margin-top:15px; background:#95a5a6">Orqaga</button>
     </div>
+
     <div id="loyihalar-menu" class="hidden">
         <h3>🚀 Yoshlar Loyihalari</h3>
-        <div id="loyihalar-list"></div>
-        <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
+        <div id="loyihalar-list" class="list-container"></div>
+        <button onclick="showMenu('main')" style="width:100%; margin-top:15px; background:#95a5a6">Orqaga</button>
     </div>
+
     <div id="login-menu" class="hidden">
-        <h3>Kirish</h3>
+        <h3>Tizimga kirish</h3>
         <input type="tel" id="login-phone" placeholder="998XXXXXXXXX">
         <button onclick="login()" style="width:100%">Kirish</button>
         <p onclick="showMenu('register')" style="text-align:center; color:var(--accent); cursor:pointer; margin-top:15px">Ro'yxatdan o'tish</p>
     </div>
+
     <div id="register-menu" class="hidden">
         <h3>Ro'yxatdan o'tish</h3>
         <input type="tel" id="reg-phone" placeholder="998901234567">
-        <input type="text" id="reg-name" placeholder="F.I.SH">
-        <button onclick="verifyAndRegister()" style="width:100%; background:var(--success)">Ro'yxatdan o'tish</button>
-        <p onclick="showMenu('login')" style="text-align:center; color:var(--accent); cursor:pointer; margin-top:15px">Kirish qismiga qaytish</p>
+        <input type="text" id="reg-name" placeholder="F.I.SH (To'liq)">
+        <button onclick="verifyAndRegister()" style="width:100%; background:var(--success)">Tasdiqlash</button>
+        <p onclick="showMenu('login')" style="text-align:center; color:var(--accent); cursor:pointer; margin-top:15px">Kirishga qaytish</p>
     </div>
+
     <div id="murojaat-menu" class="hidden">
-        <h3>✍️ Yangi murojaat</h3>
+        <h3>✍️ Yangi murojaat yuborish</h3>
         <form id="complaintForm">
-            <select id="user-mahalla" required><option value="">Mahallani tanlang</option></select>
-            <textarea id="comp-text" placeholder="Muammo haqida batafsil..." rows="5" required></textarea>
-            <label style="font-size:12px">Rasm/Video (ixtiyoriy):</label>
+            <select id="user-mahalla" required>
+                <option value="">Mahallani tanlang...</option>
+            </select>
+            <textarea id="comp-text" placeholder="Muammoingizni qisqacha yozing..." rows="5" required></textarea>
+            <label style="font-size:12px; color: #666;">Fayl ilova qilish (Rasm/Video):</label>
             <input type="file" id="comp-file" accept="image/*,video/*">
-            <button type="submit" id="submit-btn" style="width:100%; background:var(--success); margin-top:10px">Yuborish</button>
+            <button type="submit" id="submit-btn" style="width:100%; background:var(--success); margin-top:10px">Murojaatni yuborish</button>
         </form>
-        <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
+        <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Bekor qilish</button>
     </div>
+
     <div id="profile-panel" class="hidden">
-        <h3 id="panel-name"></h3>
-        <button onclick="logout()" style="width:100%; background:#e74c3c">Chiqish</button>
+        <h3 id="panel-name">Foydalanuvchi</h3>
+        <div class="card">Tizimda faolsiz.</div>
+        <button onclick="logout()" style="width:100%; background:#e74c3c">Hisobdan chiqish</button>
         <button onclick="showMenu('main')" style="width:100%; margin-top:10px; background:#95a5a6">Orqaga</button>
     </div>
 </div>
+
 <script>
     let currentUser = JSON.parse(localStorage.getItem('portalUser'));
     const menus = ['main-menu','login-menu','register-menu','murojaat-menu','profile-panel','mahallalar-menu','loyihalar-menu'];
 
     function showMenu(id) {
         menus.forEach(m => document.getElementById(m).classList.add('hidden'));
-        const target = id.includes('-menu') ? id : id + '-menu';
-        document.getElementById(target).classList.remove('hidden');
+        const target = id.endsWith('-menu') ? id : id + '-menu';
+        const el = document.getElementById(target);
+        if(el) el.classList.remove('hidden');
+        window.scrollTo(0,0);
     }
 
     async function loadData() {
         try {
             const res = await fetch('/api/data');
+            if(!res.ok) throw new Error("Server xatosi");
             const data = await res.json();
+            
             const mList = document.getElementById('mahallalar-list');
             const mSelect = document.getElementById('user-mahalla');
+            
             mList.innerHTML = '';
-            Object.keys(data.contactData).sort().forEach(name => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `<strong>${name}</strong><br>${data.contactData[name]}`;
-                mList.appendChild(card);
-                const opt = document.createElement('option');
-                opt.value = name; opt.innerText = name;
-                mSelect.appendChild(opt);
-            });
+            mSelect.innerHTML = '<option value="">Mahallani tanlang...</option>'; // Tozalash
+
+            if(data.mahallalar) {
+                data.mahallalar.forEach(item => {
+                    // List uchun
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <strong>📍 ${item.m}</strong><br>
+                        🏛️ Rais: ${item.members.rais}<br>
+                        💼 Hokim yord: ${item.members.hokim_yordamchisi}<br>
+                        👮 Inspektor: ${item.members.inspektor}
+                    `;
+                    mList.appendChild(card);
+
+                    // Select uchun
+                    const opt = document.createElement('option');
+                    opt.value = item.m; 
+                    opt.innerText = item.m;
+                    mSelect.appendChild(opt);
+                });
+            }
+
             const lList = document.getElementById('loyihalar-list');
             lList.innerHTML = '';
-            Object.entries(data.loyihalarHaqida).forEach(([title, info]) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `<strong>${title}</strong><br>${info.info}`;
-                lList.appendChild(card);
-            });
-        } catch (e) { console.error("Data load error"); }
+            if(data.loyihalarHaqida) {
+                Object.entries(data.loyihalarHaqida).forEach(([title, info]) => {
+                    const lCard = document.createElement('div');
+                    lCard.className = 'card';
+                    lCard.innerHTML = `<strong>${title}</strong><br>${info.info}`;
+                    lList.appendChild(lCard);
+                });
+            }
+        } catch (e) { 
+            console.error("Ma'lumot yuklashda xato:", e);
+        }
     }
 
     function checkAuthAndShow(menu) { currentUser ? showMenu(menu) : showMenu('login'); }
-    function handleProfileClick() { if(currentUser) { document.getElementById('panel-name').innerText = currentUser.fullname; showMenu('profile-panel'); } else showMenu('login'); }
+    
+    function handleProfileClick() { 
+        if(currentUser) { 
+            document.getElementById('panel-name').innerText = currentUser.fullname; 
+            showMenu('profile-panel'); 
+        } else showMenu('login'); 
+    }
 
     function verifyAndRegister() {
         const fullname = document.getElementById('reg-name').value;
@@ -123,7 +166,7 @@
 
     function login() {
         const phone = document.getElementById('login-phone').value;
-        if(!phone) return alert("Raqamni yozing!");
+        if(!phone) return alert("Raqamni kiriting!");
         currentUser = { phone, fullname: "Foydalanuvchi" };
         localStorage.setItem('portalUser', JSON.stringify(currentUser));
         location.reload();
@@ -133,22 +176,36 @@
         e.preventDefault();
         const btn = document.getElementById('submit-btn');
         btn.disabled = true; btn.innerText = "Yuborilmoqda...";
+        
         const formData = new FormData();
         formData.append('fullname', currentUser.fullname);
         formData.append('phone', currentUser.phone);
         formData.append('mahalla', document.getElementById('user-mahalla').value);
         formData.append('text', document.getElementById('comp-text').value);
+        
         const fileInput = document.getElementById('comp-file');
         if(fileInput.files[0]) formData.append('file', fileInput.files[0]);
+
         try {
             const res = await fetch('/api/murojaat', { method: 'POST', body: formData });
-            if(res.ok) { alert("Yuborildi!"); showMenu('main'); document.getElementById('complaintForm').reset(); }
-        } catch (err) { alert("Xato!"); }
-        finally { btn.disabled = false; btn.innerText = "Yuborish"; }
+            if(res.ok) { 
+                alert("Muvaffaqiyatli yuborildi!"); 
+                showMenu('main'); 
+                document.getElementById('complaintForm').reset(); 
+            } else {
+                alert("Server qabul qilmadi.");
+            }
+        } catch (err) { alert("Aloqa xatosi!"); }
+        finally { btn.disabled = false; btn.innerText = "Murojaatni yuborish"; }
     };
 
     function logout() { localStorage.removeItem('portalUser'); location.reload(); }
-    if(currentUser) document.getElementById('header-user-name').innerText = currentUser.fullname.split(' ')[0];
+    
+    if(currentUser) {
+        document.getElementById('header-user-name').innerText = currentUser.fullname.split(' ')[0];
+    }
+    
+    // Sahifa yuklanganda ma'lumotlarni olish
     loadData();
 </script>
 </body>
