@@ -80,8 +80,8 @@ let mahallaData = [
     members: {
       rais: "Yunusov K.I. +998936007700",
       hokim_yordamchisi: "Nosirova D.A. +998932991131",
-      yoshlar_yetakchisi: "Niyazova Sh.A. +998936057261",
-      xotin_qizlar: "Xayrullayev D.X. +998930050851",
+      yoshlar_yetakchisi: " Xayrullayev D.X. +998930050851",
+      xotin_qizlar: "Niyazova Sh.A. +998936057261",
       inspektor: "Alikulov O.I. +998943633396",
       soliqchi: "Nizomiddinov B.A. +998944015282",
       ijtimoiy_xodim: "Yuldosheva G.M. +998900059293"
@@ -686,4 +686,5 @@ app.listen(PORT, () => {
     console.log(`Bot ${PORT} portda ishga tushdi...`);
     console.log(`Webhook: /webhook`);
 });
+
 
