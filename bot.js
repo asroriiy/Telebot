@@ -78,13 +78,13 @@ let mahallaData = [
   {
     m: "Chotqol",
     members: {
-      rais: "Sattarov B.X. +998943677464",
-      hokim_yordamchisi: "Xayrullayev D.U. +998930050851",
-      yoshlar_yetakchisi: "Mamasoliyev M.B. +998991300096",
-      xotin_qizlar: "Saydakulova Z.A. +998944246714",
-      inspektor: "Maxamatov A.D. +998944030232",
-      soliqchi: "Sanaqulov U.T. +998909481212",
-      ijtimoiy_xodim: "Toshmetova O'.B. +998944122822"
+      rais: "Yunusov K.I. +998936007700",
+      hokim_yordamchisi: "Nosirova D.A. +998932991131",
+      yoshlar_yetakchisi: "Niyazova Sh.A. +998936057261",
+      xotin_qizlar: "Xayrullayev D.X. +998930050851",
+      inspektor: "Alikulov O.I. +998943633396",
+      soliqchi: "Nizomiddinov B.A. +998944015282",
+      ijtimoiy_xodim: "Yuldosheva G.M. +998900059293"
     }
   },
   {
@@ -686,3 +686,4 @@ app.listen(PORT, () => {
     console.log(`Bot ${PORT} portda ishga tushdi...`);
     console.log(`Webhook: /webhook`);
 });
+
