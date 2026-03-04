@@ -485,29 +485,22 @@ let mahallaData = [
   }
 ];
 
-// --- FUNKSIYALAR ---
-
 async function registerUser(ctx) {
     try {
         const data = JSON.parse(await fs.readFile(USERS_FILE, 'utf8'));
         const chatId = ctx.chat.id;
         const chatType = ctx.chat.type;
-        
-        // Guruh yoki shaxsiy ekanligini aniqlash
         const key = (chatType === "group" || chatType === "supergroup") ? "groups" : "private";
         
-        // Faqat mavjud bo'lmasa qo'shish
         if (!data[key].includes(chatId)) {
             data[key].push(chatId);
             await fs.writeFile(USERS_FILE, JSON.stringify(data, null, 2));
-            console.log(`Yangi foydalanuvchi qo'shildi: ${chatId} (${key})`);
         }
     } catch (error) {
-        console.error("Foydalanuvchini ro'yxatga olishda xato:", error);
+        console.error("Ro'yxatga olishda xato:", error);
     }
 }
 
-// Chiroyli formatlash funksiyasi
 function formatMahallaInfo(mahalla) {
     return `📍 <b>${mahalla.m} mahallasi mas'ullari:</b>\n\n` +
         `👤 <b>Rais:</b> ${mahalla.members.rais}\n` +
@@ -531,7 +524,6 @@ const userKb = new Keyboard()
 
 const backBtn = "⬅️ Orqaga";
 
-// Mahallalar klaviaturasi
 const makeMahallaKb = () => {
     const kb = new Keyboard();
     mahallaData.forEach((item, i) => {
@@ -541,24 +533,21 @@ const makeMahallaKb = () => {
     return kb.row().text(backBtn).resized();
 };
 
-// --- XABAR TARQATISH UCHUN HOLAT ---
-let broadcastingUser = null; // Xabar tarqatayotgan admin ID si
+let broadcastingUser = null;
 
 // --- ESHITUVCHILAR ---
 
 bot.command("start", async (ctx) => {
     await registerUser(ctx);
     const kb = ctx.from.id === MAIN_ADMIN ? adminKb : userKb;
-    await ctx.reply(
-        "Assalomu alaykum! Angren shahri mahalla yettiligi ma'lumotlar botiga xush kelibsiz.",
-        { reply_markup: kb }
-    );
+    await ctx.reply("Assalomu alaykum! Angren shahri mahalla yettiligi ma'lumotlar botiga xush kelibsiz.", { reply_markup: kb });
 });
 
 bot.command("cancel", async (ctx) => {
     if (broadcastingUser === ctx.from.id) {
         broadcastingUser = null;
-        await ctx.reply("❌ Xabar tarqatish bekor qilindi.");
+        const kb = ctx.from.id === MAIN_ADMIN ? adminKb : userKb;
+        await ctx.reply("❌ Xabar tarqatish bekor qilindi.", { reply_markup: kb });
     }
 });
 
@@ -566,8 +555,13 @@ bot.hears("📍 Mahallalar", async (ctx) => {
     await ctx.reply("Mahallani tanlang:", { reply_markup: makeMahallaKb() });
 });
 
-// Mahalla ma'lumotlarini ko'rsatish
-bot.hears(mahallaData.map(m => m.m), async (ctx) => {  // To'g'ridan-to'g'ri hears bilan
+bot.hears(backBtn, async (ctx) => {
+    broadcastingUser = null; // Holatni tozalash
+    const kb = ctx.from.id === MAIN_ADMIN ? adminKb : userKb;
+    await ctx.reply("Asosiy menyu:", { reply_markup: kb });
+});
+
+bot.hears(mahallaData.map(m => m.m), async (ctx) => {
     const mahalla = mahallaData.find(x => x.m === ctx.message.text);
     if (mahalla) {
         await ctx.reply(formatMahallaInfo(mahalla), { parse_mode: "HTML" });
@@ -576,7 +570,6 @@ bot.hears(mahallaData.map(m => m.m), async (ctx) => {  // To'g'ridan-to'g'ri hea
 
 bot.hears("📊 Statistika", async (ctx) => {
     if (ctx.from.id !== MAIN_ADMIN) return;
-    
     try {
         const data = JSON.parse(await fs.readFile(USERS_FILE, 'utf8'));
         const total = data.private.length + data.groups.length;
@@ -587,104 +580,52 @@ bot.hears("📊 Statistika", async (ctx) => {
             `🏁 Jami: ${total}`,
             { parse_mode: "HTML" }
         );
-    } catch (error) {
-        console.error("Statistika olishda xato:", error);
-        await ctx.reply("❌ Xatolik yuz berdi.");
-    }
+    } catch (e) { await ctx.reply("Xato yuz berdi."); }
 });
 
 bot.hears("📢 Xabar tarqatish", async (ctx) => {
     if (ctx.from.id !== MAIN_ADMIN) return;
-    
     broadcastingUser = ctx.from.id;
-    await ctx.reply(
-        "📝 Xabaringizni yuboring (yoki bekor qilish uchun /cancel):\n\n" +
-        "✅ Matn, rasm, video yoki boshqa turdagi xabarlarni yuborishingiz mumkin."
-    );
-});
-
-// Xabar tarqatish - har qanday turdagi xabarni qabul qilish
-bot.on("message", async (ctx) => {
-    // Agar broadcasting holatda bo'lmasa, hech narsa qilma
-    if (broadcastingUser !== ctx.from.id) return;
-    
-    // Bekor qilish komandasi /cancel bilan alohida ishlanadi
-    if (ctx.message.text === "/cancel") return;
-    
-    try {
-        const data = JSON.parse(await fs.readFile(USERS_FILE, 'utf8'));
-        const users = [...data.private, ...data.groups];
-        
-        broadcastingUser = null; // Broadcast holatini to'xtatish
-        
-        const sentMsg = await ctx.reply(`🚀 Xabar tarqatilmoqda... (${users.length} ta oluvchi)`);
-        
-        let success = 0;
-        let failed = 0;
-        
-        for (const userId of users) {
-            try {
-                // CopyMessage orqali xabarni nusxalash
-                await bot.api.copyMessage(userId, ctx.chat.id, ctx.message.message_id);
-                success++;
-                
-                // Telegram rate limitiga rioya qilish
-                if (success % 20 === 0) {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            } catch (error) {
-                failed++;
-                console.log(`Xatolik: ${userId} ga yuborilmadi - ${error.message}`);
-            }
-        }
-        
-        // Natijani yangilash
-        await ctx.api.editMessageText(
-            ctx.chat.id,
-            sentMsg.message_id,
-            `✅ Xabar tarqatish tugadi!\n\n` +
-            `📊 Natijalar:\n` +
-            `✅ Yetkazildi: ${success}\n` +
-            `❌ Yetkazilmadi: ${failed}\n` +
-            `👥 Jami: ${users.length}`
-        );
-        
-    } catch (error) {
-        console.error("Xabar tarqatishda xato:", error);
-        broadcastingUser = null;
-        await ctx.reply("❌ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
-    }
-});
-
-bot.hears(backBtn, async (ctx) => {
-    const kb = ctx.from.id === MAIN_ADMIN ? adminKb : userKb;
-    await ctx.reply("Asosiy menyu:", { reply_markup: kb });
+    await ctx.reply("📝 Xabaringizni yuboring (yoki bekor qilish uchun /cancel):", { reply_markup: { remove_keyboard: true } });
 });
 
 bot.hears("ℹ️ Ma'lumot", async (ctx) => {
     await ctx.reply(
-        "🤖 <b>Bot haqida:</b>\n\n" +
-        "Bu bot Angren shahri mahalla yettiligi ma'lumotlarini taqdim etadi.\n\n" +
-        "📌 <b>Buyruqlar:</b>\n" +
-        "📍 Mahallalar - Mahalla ro'yxati\n" +
-        "ℹ️ Ma'lumot - Bot haqida ma'lumot\n" +
-        (ctx.from.id === MAIN_ADMIN ? "📊 Statistika - Bot statistikasi\n📢 Xabar tarqatish - Xabar tarqatish\n" : "") +
-        "⬅️ Orqaga - Asosiy menyuga qaytish",
+        "🤖 <b>Bot haqida:</b>\n\nBu bot Angren shahri mahalla yettiligi ma'lumotlarini taqdim etadi.",
         { parse_mode: "HTML" }
     );
 });
 
-// Xatolarni ushlash
-bot.catch((err) => {
-    console.error("Bot xatosi:", err);
+// Xabar tarqatish mexanizmi
+bot.on("message", async (ctx) => {
+    if (broadcastingUser !== ctx.from.id) return;
+    if (ctx.message.text === "/cancel") return;
+
+    try {
+        const data = JSON.parse(await fs.readFile(USERS_FILE, 'utf8'));
+        const users = [...data.private, ...data.groups];
+        broadcastingUser = null;
+        
+        const statusMsg = await ctx.reply(`🚀 Tarqatilmoqda... (0/${users.length})`);
+        let success = 0, failed = 0;
+
+        for (const userId of users) {
+            try {
+                await bot.api.copyMessage(userId, ctx.chat.id, ctx.message.message_id);
+                success++;
+            } catch (e) { failed++; }
+            if (success % 25 === 0) await new Promise(r => setTimeout(r, 1000));
+        }
+
+        await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, 
+            `✅ Tugadi!\n\nYetkazildi: ${success}\nError: ${failed}`, { reply_markup: adminKb });
+    } catch (error) {
+        console.error(error);
+        await ctx.reply("Xatolik!");
+    }
 });
 
-// Webhook va Server
+bot.catch((err) => console.error("Bot Error:", err));
+
 app.use("/webhook", webhookCallback(bot, "express"));
-
-app.listen(PORT, () => {
-    console.log(`Bot ${PORT} portda ishga tushdi...`);
-    console.log(`Webhook: /webhook`);
-});
-
-
+app.listen(PORT, () => console.log(`Running on port ${PORT}`));
